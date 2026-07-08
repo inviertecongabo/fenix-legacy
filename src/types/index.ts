@@ -43,4 +43,7 @@ export interface FilterState {
   brands: string[]
   priceRange: [number, number]
   sortBy: 'popular' | 'price-asc' | 'price-desc' | 'newest' | 'rating'
+  sizes?: string[]
+  colors?: string[]
+  genders?: string[]
 }

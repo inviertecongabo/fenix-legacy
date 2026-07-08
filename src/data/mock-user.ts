@@ -161,4 +161,4 @@ export const orders: Order[] = [
   },
 ]
 
-export const favorites = [products[0], products[1], products[6], products[9]]
+export const favorites = [products[0], products[1]]
