@@ -38,9 +38,9 @@ const productSchema = z.object({
   brandId: z.string().min(1, "La marca es requerida"),
   isNew: z.boolean(),
   isFeatured: z.boolean(),
-  sizes: z.array(z.string()).default([]),
-  colors: z.string().default(""),
-  gender: z.string().default("Unisex"),
+  sizes: z.array(z.string()),
+  colors: z.string(),
+  gender: z.string(),
 })
 
 type ProductFormData = z.infer<typeof productSchema>
