@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight, ZoomIn } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -9,80 +9,46 @@ import { Button } from "@/components/ui/button"
 interface ProductGalleryProps {
   images: string[]
   productName: string
+  forcedIndex?: number          // controlled by parent (color selection)
+  onIndexChange?: (i: number) => void
 }
 
-export function ProductGallery({ images, productName }: ProductGalleryProps) {
+export function ProductGallery({
+  images,
+  productName,
+  forcedIndex,
+  onIndexChange,
+}: ProductGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [zoomed, setZoomed] = useState(false)
 
-  const goToPrev = () => setSelectedIndex((i) => (i === 0 ? images.length - 1 : i - 1))
-  const goToNext = () => setSelectedIndex((i) => (i === images.length - 1 ? 0 : i + 1))
+  // When parent forces a different image (color change), sync internal state
+  useEffect(() => {
+    if (forcedIndex !== undefined) setSelectedIndex(forcedIndex)
+  }, [forcedIndex])
+
+  const setIndex = (i: number) => {
+    setSelectedIndex(i)
+    onIndexChange?.(i)
+  }
+
+  const goToPrev = () => setIndex(selectedIndex === 0 ? images.length - 1 : selectedIndex - 1)
+  const goToNext = () => setIndex(selectedIndex === images.length - 1 ? 0 : selectedIndex + 1)
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Main Image */}
-      <div
-        className="relative aspect-square overflow-hidden rounded-xl bg-muted group cursor-zoom-in"
-        onClick={() => setZoomed(true)}
-      >
-        <Image
-          src={images[selectedIndex]}
-          alt={productName}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          sizes="(max-width: 768px) 100vw, 50vw"
-          priority
-        />
-
-        {/* Zoom hint */}
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="bg-black/50 text-white rounded-full p-1.5">
-            <ZoomIn className="h-4 w-4" />
-          </div>
-        </div>
-
-        {/* Arrow navigation — only when there are multiple images */}
-        {images.length > 1 && (
-          <>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 hover:bg-white shadow opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={(e) => { e.stopPropagation(); goToPrev() }}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 hover:bg-white shadow opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={(e) => { e.stopPropagation(); goToNext() }}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </>
-        )}
-
-        {/* Image counter */}
-        {images.length > 1 && (
-          <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs font-medium rounded-full px-2 py-0.5">
-            {selectedIndex + 1} / {images.length}
-          </div>
-        )}
-      </div>
-
-      {/* Thumbnails row */}
+    <div className="flex gap-3">
+      {/* ── Vertical thumbnail strip on the LEFT ── */}
       {images.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="hidden sm:flex flex-col gap-2 overflow-y-auto max-h-[520px] pr-1">
           {images.map((image, index) => (
             <button
               key={index}
-              onClick={() => setSelectedIndex(index)}
+              onClick={() => setIndex(index)}
               className={cn(
-                "relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-200",
+                "relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-200",
                 selectedIndex === index
-                  ? "border-primary ring-2 ring-primary/30 scale-105"
-                  : "border-transparent hover:border-muted-foreground/40 hover:scale-105 opacity-70 hover:opacity-100"
+                  ? "border-primary ring-2 ring-primary/30"
+                  : "border-transparent hover:border-muted-foreground/40 opacity-60 hover:opacity-100"
               )}
             >
               <Image
@@ -90,14 +56,93 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 alt={`${productName} - vista ${index + 1}`}
                 fill
                 className="object-cover"
-                sizes="80px"
+                sizes="72px"
               />
             </button>
           ))}
         </div>
       )}
 
-      {/* Lightbox / Zoom Modal */}
+      {/* ── Main image ── */}
+      <div className="flex-1 flex flex-col gap-3">
+        <div
+          className="relative aspect-square overflow-hidden rounded-xl bg-muted group cursor-zoom-in"
+          onClick={() => setZoomed(true)}
+        >
+          <Image
+            src={images[selectedIndex]}
+            alt={productName}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 50vw"
+            priority
+          />
+
+          {/* Zoom hint */}
+          <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="bg-black/50 text-white rounded-full p-1.5">
+              <ZoomIn className="h-4 w-4" />
+            </div>
+          </div>
+
+          {/* Arrow navigation */}
+          {images.length > 1 && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 hover:bg-white shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => { e.stopPropagation(); goToPrev() }}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/80 hover:bg-white shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => { e.stopPropagation(); goToNext() }}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+
+          {/* Counter */}
+          {images.length > 1 && (
+            <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs font-medium rounded-full px-2 py-0.5">
+              {selectedIndex + 1} / {images.length}
+            </div>
+          )}
+        </div>
+
+        {/* Mobile thumbnails (horizontal, below image) */}
+        {images.length > 1 && (
+          <div className="flex sm:hidden gap-2 overflow-x-auto pb-1">
+            {images.map((image, index) => (
+              <button
+                key={index}
+                onClick={() => setIndex(index)}
+                className={cn(
+                  "relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-200",
+                  selectedIndex === index
+                    ? "border-primary ring-2 ring-primary/30"
+                    : "border-transparent opacity-60 hover:opacity-100"
+                )}
+              >
+                <Image
+                  src={image}
+                  alt={`${productName} - ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="64px"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Lightbox ── */}
       {zoomed && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 cursor-zoom-out"

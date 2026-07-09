@@ -1,7 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Heart, ShoppingCart, Star, Minus, Plus, Truck, RotateCcw, ShieldCheck, Check, Ruler, X } from "lucide-react"
+import {
+  Heart, ShoppingCart, Star, Minus, Plus,
+  Truck, RotateCcw, ShieldCheck, Check, Ruler, X, ChevronDown
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -11,22 +14,25 @@ import { useCartStore } from "@/stores/cart-store"
 
 interface ProductDetailProps {
   product: Product
+  /** Called with the image index that corresponds to the selected color */
+  onColorImageChange?: (index: number) => void
 }
 
 // Size guide data
 const SIZE_GUIDE = [
-  { size: "XS", chest: "84–88",  waist: "66–70",  hip: "90–94"  },
-  { size: "S",  chest: "88–92",  waist: "70–74",  hip: "94–98"  },
-  { size: "M",  chest: "92–96",  waist: "74–78",  hip: "98–102" },
-  { size: "L",  chest: "96–100", waist: "78–82",  hip: "102–106"},
-  { size: "XL", chest: "100–104",waist: "82–86",  hip: "106–110"},
-  { size: "XXL",chest: "104–110",waist: "86–92",  hip: "110–116"},
+  { size: "XS",  chest: "84–88",   waist: "66–70",  hip: "90–94"   },
+  { size: "S",   chest: "88–92",   waist: "70–74",  hip: "94–98"   },
+  { size: "M",   chest: "92–96",   waist: "74–78",  hip: "98–102"  },
+  { size: "L",   chest: "96–100",  waist: "78–82",  hip: "102–106" },
+  { size: "XL",  chest: "100–104", waist: "82–86",  hip: "106–110" },
+  { size: "XXL", chest: "104–110", waist: "86–92",  hip: "110–116" },
 ]
 
-export function ProductDetail({ product }: ProductDetailProps) {
-  const [quantity, setQuantity] = useState(1)
-  const [added, setAdded] = useState(false)
-  const [selectedSize, setSelectedSize] = useState<string | null>(null)
+export function ProductDetail({ product, onColorImageChange }: ProductDetailProps) {
+  const [quantity, setQuantity]       = useState(1)
+  const [added, setAdded]             = useState(false)
+  const [selectedSize, setSelectedSize]   = useState("")
+  const [selectedColor, setSelectedColor] = useState("")
   const [showSizeGuide, setShowSizeGuide] = useState(false)
   const addItem = useCartStore((state) => state.addItem)
 
@@ -35,32 +41,37 @@ export function ProductDetail({ product }: ProductDetailProps) {
     ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
     : 0
 
-  // sizes comes from the API already as string[]
-  const sizes = Array.isArray(product.sizes) ? product.sizes.filter(Boolean) : []
+  const sizes  = Array.isArray(product.sizes)  ? product.sizes.filter(Boolean)  : []
+  const colors = Array.isArray(product.colors) ? product.colors.filter(Boolean) : []
 
-  const decreaseQuantity = () => {
-    if (quantity > 1) setQuantity(quantity - 1)
-  }
+  const decreaseQuantity = () => { if (quantity > 1) setQuantity(quantity - 1) }
+  const increaseQuantity = () => { if (quantity < product.stock) setQuantity(quantity + 1) }
 
-  const increaseQuantity = () => {
-    if (quantity < product.stock) setQuantity(quantity + 1)
+  const handleColorChange = (color: string) => {
+    setSelectedColor(color)
+    // Switch gallery to the image whose index matches the color index
+    const colorIndex = colors.indexOf(color)
+    if (colorIndex !== -1 && onColorImageChange) {
+      onColorImageChange(Math.min(colorIndex, product.images.length - 1))
+    }
   }
 
   const handleAddToCart = () => {
-    addItem(product, quantity, selectedSize ?? undefined)
+    addItem(product, quantity, selectedSize || undefined)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }
 
-  const canAddToCart = product.stock > 0 && (sizes.length === 0 || selectedSize !== null)
+  const needsSize  = sizes.length > 0 && !selectedSize
+  const needsColor = colors.length > 0 && !selectedColor
+  const canAddToCart = product.stock > 0 && !needsSize && !needsColor
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
+
       {/* Badges */}
       <div className="flex gap-2">
-        {product.isNew && (
-          <Badge className="bg-primary text-primary-foreground">Nuevo</Badge>
-        )}
+        {product.isNew && <Badge className="bg-primary text-primary-foreground">Nuevo</Badge>}
         {hasDiscount && <Badge variant="destructive">-{discountPercent}%</Badge>}
       </div>
 
@@ -85,7 +96,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
           ))}
         </div>
         <span className="text-sm font-medium">{product.rating}</span>
-        <span className="text-sm text-muted-foreground">(128 resenas)</span>
+        <span className="text-sm text-muted-foreground">(128 reseñas)</span>
       </div>
 
       {/* Price */}
@@ -115,22 +126,20 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
       {/* Description */}
       <div>
-        <h3 className="font-semibold mb-2">Descripcion</h3>
+        <h3 className="font-semibold mb-1">Descripción</h3>
         <p className="text-sm text-muted-foreground">{product.description}</p>
       </div>
 
       <Separator />
 
-      {/* ── SIZE SELECTOR ── */}
+      {/* ── SIZE DROPDOWN (eBay style) ── */}
       {sizes.length > 0 && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold">
-              Talla
-              {selectedSize && (
-                <span className="ml-2 text-primary font-bold">{selectedSize}</span>
-              )}
-            </h3>
+            <label htmlFor="size-select" className="text-sm font-semibold">
+              Talla:{" "}
+              {selectedSize && <span className="text-primary">{selectedSize}</span>}
+            </label>
             <button
               onClick={() => setShowSizeGuide(true)}
               className="flex items-center gap-1 text-xs text-primary hover:underline"
@@ -139,25 +148,21 @@ export function ProductDetail({ product }: ProductDetailProps) {
               Guía de tallas
             </button>
           </div>
-
-          <div className="flex flex-wrap gap-2">
-            {sizes.map((size) => (
-              <button
-                key={size}
-                onClick={() => setSelectedSize(size === selectedSize ? null : size)}
-                className={cn(
-                  "h-10 min-w-[2.5rem] rounded-lg border-2 px-3 text-sm font-semibold transition-all duration-150",
-                  selectedSize === size
-                    ? "border-primary bg-primary text-primary-foreground shadow-md scale-105"
-                    : "border-muted-foreground/30 hover:border-primary hover:text-primary"
-                )}
-              >
-                {size}
-              </button>
-            ))}
+          <div className="relative">
+            <select
+              id="size-select"
+              value={selectedSize}
+              onChange={(e) => setSelectedSize(e.target.value)}
+              className="w-full appearance-none rounded-lg border-2 border-muted-foreground/30 bg-background px-4 py-2.5 pr-10 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors cursor-pointer"
+            >
+              <option value="">Selecciona una talla</option>
+              {sizes.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </div>
-
-          {sizes.length > 0 && !selectedSize && (
+          {needsSize && (
             <p className="text-xs text-amber-600 dark:text-amber-400">
               Por favor selecciona una talla antes de agregar al carrito.
             </p>
@@ -165,52 +170,61 @@ export function ProductDetail({ product }: ProductDetailProps) {
         </div>
       )}
 
+      {/* ── COLOR DROPDOWN ── */}
+      {colors.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="color-select" className="text-sm font-semibold">
+            Color:{" "}
+            {selectedColor && <span className="text-primary">{selectedColor}</span>}
+          </label>
+          <div className="relative">
+            <select
+              id="color-select"
+              value={selectedColor}
+              onChange={(e) => handleColorChange(e.target.value)}
+              className="w-full appearance-none rounded-lg border-2 border-muted-foreground/30 bg-background px-4 py-2.5 pr-10 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors cursor-pointer"
+            >
+              <option value="">Selecciona un color</option>
+              {colors.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          </div>
+          {needsColor && (
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              Por favor selecciona un color antes de agregar al carrito.
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Quantity & Add to Cart */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        {/* Quantity Selector */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">Cantidad:</span>
           <div className="flex items-center rounded-md border">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-r-none"
-              onClick={decreaseQuantity}
-              disabled={quantity <= 1}
-            >
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-r-none"
+              onClick={decreaseQuantity} disabled={quantity <= 1}>
               <Minus className="h-4 w-4" />
             </Button>
             <span className="w-12 text-center text-sm font-medium">{quantity}</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-l-none"
-              onClick={increaseQuantity}
-              disabled={quantity >= product.stock}
-            >
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-l-none"
+              onClick={increaseQuantity} disabled={quantity >= product.stock}>
               <Plus className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        {/* Add to Cart */}
         <div className="flex flex-1 gap-2">
-          <Button
-            className="flex-1"
-            size="lg"
+          <Button className="flex-1" size="lg"
             disabled={!canAddToCart || added}
             onClick={handleAddToCart}
           >
             {added ? (
-              <>
-                <Check className="mr-2 h-4 w-4" />
-                Agregado
-              </>
+              <><Check className="mr-2 h-4 w-4" />Agregado</>
             ) : (
-              <>
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Agregar al Carrito
-              </>
+              <><ShoppingCart className="mr-2 h-4 w-4" />Agregar al Carrito</>
             )}
           </Button>
           <Button variant="outline" size="lg">
@@ -226,7 +240,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
         <div className="flex items-center gap-3 text-sm">
           <Truck className="h-5 w-5 text-muted-foreground" />
           <div>
-            <p className="font-medium">Envio gratis</p>
+            <p className="font-medium">Envío gratis</p>
             <p className="text-xs text-muted-foreground">En pedidos +S/ 200</p>
           </div>
         </div>
@@ -234,14 +248,14 @@ export function ProductDetail({ product }: ProductDetailProps) {
           <RotateCcw className="h-5 w-5 text-muted-foreground" />
           <div>
             <p className="font-medium">Devoluciones</p>
-            <p className="text-xs text-muted-foreground">30 dias para devolver</p>
+            <p className="text-xs text-muted-foreground">30 días para devolver</p>
           </div>
         </div>
         <div className="flex items-center gap-3 text-sm">
           <ShieldCheck className="h-5 w-5 text-muted-foreground" />
           <div>
-            <p className="font-medium">Garantia</p>
-            <p className="text-xs text-muted-foreground">1 ano de garantia</p>
+            <p className="font-medium">Garantía</p>
+            <p className="text-xs text-muted-foreground">1 año de garantía</p>
           </div>
         </div>
       </div>

@@ -28,6 +28,7 @@ export default function ProductPage({ params }: ProductPageProps) {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [colorImageIndex, setColorImageIndex] = useState(0)
 
   useEffect(() => {
     async function fetchProduct() {
@@ -140,8 +141,13 @@ export default function ProductPage({ params }: ProductPageProps) {
 
       {/* Product Content */}
       <div className="grid gap-8 lg:grid-cols-2">
-        <ProductGallery images={product.images} productName={product.name} />
-        <ProductDetail product={product} />
+        <ProductGallery
+          images={product.images}
+          productName={product.name}
+          forcedIndex={colorImageIndex}
+          onIndexChange={setColorImageIndex}
+        />
+        <ProductDetail product={product} onColorImageChange={setColorImageIndex} />
       </div>
 
       {/* Related Products */}
