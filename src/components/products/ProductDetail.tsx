@@ -35,10 +35,8 @@ export function ProductDetail({ product }: ProductDetailProps) {
     ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
     : 0
 
-  // Parse sizes from comma-separated string
-  const sizes = product.sizes
-    ? product.sizes.split(",").map((s) => s.trim()).filter(Boolean)
-    : []
+  // sizes comes from the API already as string[]
+  const sizes = Array.isArray(product.sizes) ? product.sizes.filter(Boolean) : []
 
   const decreaseQuantity = () => {
     if (quantity > 1) setQuantity(quantity - 1)
