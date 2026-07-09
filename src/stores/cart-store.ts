@@ -6,9 +6,9 @@ interface CartState {
   items: CartItem[]
 
   // Actions
-  addItem: (product: Product, quantity?: number) => void
-  removeItem: (productId: string) => void
-  updateQuantity: (productId: string, quantity: number) => void
+  addItem: (product: Product, quantity?: number, size?: string) => void
+  removeItem: (productId: string, size?: string) => void
+  updateQuantity: (productId: string, quantity: number, size?: string) => void
   clearCart: () => void
 
   // Computed helpers
@@ -21,16 +21,16 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
 
-      addItem: (product, quantity = 1) => {
+      addItem: (product, quantity = 1, size) => {
         set((state) => {
           const existingItem = state.items.find(
-            (item) => item.product.id === product.id
+            (item) => item.product.id === product.id && item.size === size
           )
 
           if (existingItem) {
             return {
               items: state.items.map((item) =>
-                item.product.id === product.id
+                item.product.id === product.id && item.size === size
                   ? { ...item, quantity: item.quantity + quantity }
                   : item
               ),
@@ -38,7 +38,7 @@ export const useCartStore = create<CartState>()(
           }
 
           return {
-            items: [...state.items, { product, quantity }],
+            items: [...state.items, { product, quantity, size }],
           }
         })
       },

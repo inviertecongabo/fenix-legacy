@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Heart, ShoppingCart, Star, Minus, Plus, Truck, RotateCcw, ShieldCheck, Check } from "lucide-react"
+import { Heart, ShoppingCart, Star, Minus, Plus, Truck, RotateCcw, ShieldCheck, Check, Ruler, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
 import { Product } from "@/types"
 import { useCartStore } from "@/stores/cart-store"
 
@@ -12,15 +13,32 @@ interface ProductDetailProps {
   product: Product
 }
 
+// Size guide data
+const SIZE_GUIDE = [
+  { size: "XS", chest: "84–88",  waist: "66–70",  hip: "90–94"  },
+  { size: "S",  chest: "88–92",  waist: "70–74",  hip: "94–98"  },
+  { size: "M",  chest: "92–96",  waist: "74–78",  hip: "98–102" },
+  { size: "L",  chest: "96–100", waist: "78–82",  hip: "102–106"},
+  { size: "XL", chest: "100–104",waist: "82–86",  hip: "106–110"},
+  { size: "XXL",chest: "104–110",waist: "86–92",  hip: "110–116"},
+]
+
 export function ProductDetail({ product }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
+  const [selectedSize, setSelectedSize] = useState<string | null>(null)
+  const [showSizeGuide, setShowSizeGuide] = useState(false)
   const addItem = useCartStore((state) => state.addItem)
 
   const hasDiscount = product.originalPrice && product.originalPrice > product.price
   const discountPercent = hasDiscount
     ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
     : 0
+
+  // Parse sizes from comma-separated string
+  const sizes = product.sizes
+    ? product.sizes.split(",").map((s) => s.trim()).filter(Boolean)
+    : []
 
   const decreaseQuantity = () => {
     if (quantity > 1) setQuantity(quantity - 1)
@@ -31,10 +49,12 @@ export function ProductDetail({ product }: ProductDetailProps) {
   }
 
   const handleAddToCart = () => {
-    addItem(product, quantity)
+    addItem(product, quantity, selectedSize ?? undefined)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }
+
+  const canAddToCart = product.stock > 0 && (sizes.length === 0 || selectedSize !== null)
 
   return (
     <div className="flex flex-col gap-6">
@@ -103,6 +123,50 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
       <Separator />
 
+      {/* ── SIZE SELECTOR ── */}
+      {sizes.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold">
+              Talla
+              {selectedSize && (
+                <span className="ml-2 text-primary font-bold">{selectedSize}</span>
+              )}
+            </h3>
+            <button
+              onClick={() => setShowSizeGuide(true)}
+              className="flex items-center gap-1 text-xs text-primary hover:underline"
+            >
+              <Ruler className="h-3 w-3" />
+              Guía de tallas
+            </button>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {sizes.map((size) => (
+              <button
+                key={size}
+                onClick={() => setSelectedSize(size === selectedSize ? null : size)}
+                className={cn(
+                  "h-10 min-w-[2.5rem] rounded-lg border-2 px-3 text-sm font-semibold transition-all duration-150",
+                  selectedSize === size
+                    ? "border-primary bg-primary text-primary-foreground shadow-md scale-105"
+                    : "border-muted-foreground/30 hover:border-primary hover:text-primary"
+                )}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+
+          {sizes.length > 0 && !selectedSize && (
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              Por favor selecciona una talla antes de agregar al carrito.
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Quantity & Add to Cart */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         {/* Quantity Selector */}
@@ -136,7 +200,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
           <Button
             className="flex-1"
             size="lg"
-            disabled={product.stock === 0 || added}
+            disabled={!canAddToCart || added}
             onClick={handleAddToCart}
           >
             {added ? (
@@ -200,6 +264,59 @@ export function ProductDetail({ product }: ProductDetailProps) {
             </dl>
           </div>
         </>
+      )}
+
+      {/* ── SIZE GUIDE MODAL ── */}
+      {showSizeGuide && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+          onClick={() => setShowSizeGuide(false)}
+        >
+          <div
+            className="relative w-full max-w-md rounded-2xl bg-background p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowSizeGuide(false)}
+              className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <h2 className="mb-1 text-lg font-bold">Guía de Tallas</h2>
+            <p className="mb-4 text-xs text-muted-foreground">
+              Medidas en centímetros. Mídete sin ropa para mayor exactitud.
+            </p>
+            <table className="w-full text-sm text-center">
+              <thead>
+                <tr className="border-b">
+                  <th className="py-2 text-left font-semibold">Talla</th>
+                  <th className="py-2 font-semibold">Pecho (cm)</th>
+                  <th className="py-2 font-semibold">Cintura (cm)</th>
+                  <th className="py-2 font-semibold">Cadera (cm)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {SIZE_GUIDE.map((row) => (
+                  <tr
+                    key={row.size}
+                    className={cn(
+                      "border-b last:border-0 transition-colors",
+                      selectedSize === row.size && "bg-primary/10 font-semibold"
+                    )}
+                  >
+                    <td className="py-2 text-left font-medium">{row.size}</td>
+                    <td className="py-2">{row.chest}</td>
+                    <td className="py-2">{row.waist}</td>
+                    <td className="py-2">{row.hip}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Si estás entre dos tallas, te recomendamos elegir la talla mayor.
+            </p>
+          </div>
+        </div>
       )}
     </div>
   )
