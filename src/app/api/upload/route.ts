@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
+import { writeFileSync, mkdirSync, existsSync } from "fs"
+import { join } from "path"
+import { put, del } from "@vercel/blob"
 import { cloudinary } from "@/lib/cloudinary"
 
 export async function POST(request: NextRequest) {
@@ -31,36 +34,71 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Convertir a buffer
+    // ── OPTION A: Vercel Blob Storage (Preferred on Vercel) ──
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`
+      const blob = await put(filename, file, { access: "public" })
+      return NextResponse.json({
+        url: blob.url,
+        publicId: blob.url, // Use the URL as identifier for deletion
+      })
+    }
+
+    // ── OPTION B: Cloudinary (If credentials are set) ──
+    const hasCloudinary =
+      process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_KEY !== "placeholder_key"
+
+    if (hasCloudinary) {
+      const bytes = await file.arrayBuffer()
+      const buffer = Buffer.from(bytes)
+
+      const result = await new Promise<{ secure_url: string; public_id: string }>(
+        (resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream(
+              {
+                folder: "basictech/products",
+                resource_type: "image",
+                transformation: [
+                  { width: 1200, height: 1200, crop: "limit" },
+                  { quality: "auto" },
+                  { fetch_format: "auto" },
+                ],
+              },
+              (error, result) => {
+                if (error) reject(error)
+                else resolve(result as { secure_url: string; public_id: string })
+              }
+            )
+            .end(buffer)
+        }
+      )
+
+      return NextResponse.json({
+        url: result.secure_url,
+        publicId: result.public_id,
+      })
+    }
+
+    // ── OPTION C: Local Filesystem Fallback (For local dev without Cloudinary/Vercel) ──
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Subir a Cloudinary
-    const result = await new Promise<{ secure_url: string; public_id: string }>(
-      (resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream(
-            {
-              folder: "basictech/products",
-              resource_type: "image",
-              transformation: [
-                { width: 1200, height: 1200, crop: "limit" },
-                { quality: "auto" },
-                { fetch_format: "auto" },
-              ],
-            },
-            (error, result) => {
-              if (error) reject(error)
-              else resolve(result as { secure_url: string; public_id: string })
-            }
-          )
-          .end(buffer)
-      }
-    )
+    const uploadDir = join(process.cwd(), "public", "uploads")
+    if (!existsSync(uploadDir)) {
+      mkdirSync(uploadDir, { recursive: true })
+    }
 
+    const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`
+    const filePath = join(uploadDir, filename)
+    writeFileSync(filePath, buffer)
+
+    const fileUrl = `/uploads/${filename}`
     return NextResponse.json({
-      url: result.secure_url,
-      publicId: result.public_id,
+      url: fileUrl,
+      publicId: `local:${filename}`, // prefix to identify local deletions
     })
   } catch (error) {
     console.error("Error uploading image:", error)
@@ -83,8 +121,20 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    await cloudinary.uploader.destroy(publicId)
+    // ── Option A: Vercel Blob deletion ──
+    if (publicId.startsWith("http")) {
+      await del(publicId)
+      return NextResponse.json({ success: true })
+    }
 
+    // ── Option C: Local deletion ──
+    if (publicId.startsWith("local:")) {
+      // Local deletions can be skipped or implemented if needed, but not critical for dev
+      return NextResponse.json({ success: true })
+    }
+
+    // ── Option B: Cloudinary deletion ──
+    await cloudinary.uploader.destroy(publicId)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error deleting image:", error)

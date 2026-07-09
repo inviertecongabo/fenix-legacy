@@ -8,11 +8,11 @@ import {
   CreditCard,
   Users,
   Settings,
-  ChevronLeft,
   Store,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "../layout/ThemeToggle"
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -30,9 +30,9 @@ export function AdminSidebar() {
       {/* Logo */}
       <div className="flex h-16 items-center gap-2 border-b px-6">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-          <span className="text-sm font-bold text-primary-foreground">BT</span>
+          <span className="text-sm font-bold text-primary-foreground">FL</span>
         </div>
-        <span className="font-bold">Admin Panel</span>
+        <span className="font-bold">Fénix Legacy</span>
       </div>
 
       {/* Navigation */}
@@ -57,14 +57,15 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      {/* Back to Store */}
-      <div className="border-t p-4">
-        <Button asChild variant="outline" className="w-full justify-start">
+      {/* Footer / Theme Toggle */}
+      <div className="border-t p-4 flex items-center gap-2">
+        <Button asChild variant="outline" className="flex-1 justify-start">
           <Link href="/">
             <Store className="mr-2 h-4 w-4" />
-            Volver a la Tienda
+            Volver
           </Link>
         </Button>
+        <ThemeToggle />
       </div>
     </aside>
   )
