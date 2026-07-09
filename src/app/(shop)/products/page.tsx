@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
+import { LayoutGrid, List } from "lucide-react"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,6 +11,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Button } from "@/components/ui/button"
 import { FilterSidebar } from "@/components/products/FilterSidebar"
 import { FilterMobile } from "@/components/products/FilterMobile"
 import { ProductGrid } from "@/components/products/ProductGrid"
@@ -94,6 +96,26 @@ function ProductsContent() {
               setFilters({ sortBy: sortBy as FilterState["sortBy"] })
             }
           />
+          <div className="hidden items-center gap-1 border-l pl-3 sm:flex">
+            <Button
+              variant={viewMode === "grid" ? "default" : "ghost"}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setViewMode("grid")}
+            >
+              <LayoutGrid className="h-4 w-4" />
+              <span className="sr-only">Vista cuadricula</span>
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setViewMode("list")}
+            >
+              <List className="h-4 w-4" />
+              <span className="sr-only">Vista lista</span>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -111,7 +133,6 @@ function ProductsContent() {
           <ProductGrid
             products={products}
             viewMode={viewMode}
-            onViewModeChange={setViewMode}
             loading={loading}
           />
         </div>

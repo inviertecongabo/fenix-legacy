@@ -2,11 +2,8 @@
 
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { BrandFilter } from "./BrandFilter"
-import { PriceFilter } from "./PriceFilter"
 import { CategoryFilter } from "./CategoryFilter"
 import { GenderFilter } from "./GenderFilter"
-import { SizeFilter } from "./SizeFilter"
 import { FilterState } from "@/types"
 
 interface FilterSidebarProps {
@@ -16,18 +13,14 @@ interface FilterSidebarProps {
 
 export function FilterSidebar({ filters, onFiltersChange }: FilterSidebarProps) {
   const hasActiveFilters =
-    filters.brands.length > 0 ||
     filters.categories.length > 0 ||
-    (filters.genders && filters.genders.length > 0) ||
-    (filters.sizes && filters.sizes.length > 0) ||
-    filters.priceRange[0] > 0 ||
-    filters.priceRange[1] < 10000
+    (filters.genders && filters.genders.length > 0)
 
   const handleClearFilters = () => {
     onFiltersChange({
       brands: [],
       categories: [],
-      priceRange: [0, 10000],
+      priceRange: [0, 500],
       sortBy: filters.sortBy,
       genders: [],
       sizes: [],
@@ -56,27 +49,6 @@ export function FilterSidebar({ filters, onFiltersChange }: FilterSidebarProps) 
         selectedGenders={filters.genders || []}
         onGendersChange={(genders) =>
           onFiltersChange({ ...filters, genders })
-        }
-      />
-
-      <SizeFilter
-        selectedSizes={filters.sizes || []}
-        onSizesChange={(sizes) =>
-          onFiltersChange({ ...filters, sizes })
-        }
-      />
-
-      <BrandFilter
-        selectedBrands={filters.brands}
-        onBrandsChange={(brands) =>
-          onFiltersChange({ ...filters, brands })
-        }
-      />
-
-      <PriceFilter
-        priceRange={filters.priceRange}
-        onPriceChange={(priceRange) =>
-          onFiltersChange({ ...filters, priceRange })
         }
       />
 
