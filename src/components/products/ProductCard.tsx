@@ -6,7 +6,6 @@ import Link from "next/link"
 import { Heart, ShoppingCart, Star, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { Product } from "@/types"
 import { useCartStore } from "@/stores/cart-store"
@@ -38,16 +37,16 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <Card className="group overflow-hidden transition-all hover:shadow-lg border-0 shadow-sm">
-      {/* Image — square aspect ratio for max detail */}
-      <div className="relative aspect-square overflow-hidden bg-muted">
+    <div className="group overflow-hidden rounded-lg bg-card border border-border/40 shadow-sm hover:shadow-md transition-shadow">
+      {/* IMAGE — tall 3:4 ratio, dominates the card */}
+      <div className="relative aspect-[3/4] overflow-hidden bg-muted">
         {/* Badges */}
-        <div className="absolute left-2 top-2 z-10 flex flex-col gap-1">
+        <div className="absolute left-1.5 top-1.5 z-10 flex flex-col gap-0.5">
           {product.isNew && (
-            <Badge className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0">Nuevo</Badge>
+            <Badge className="bg-primary text-primary-foreground text-[9px] px-1.5 py-0 h-4">Nuevo</Badge>
           )}
           {hasDiscount && (
-            <Badge variant="destructive" className="text-[10px] px-1.5 py-0">-{discountPercent}%</Badge>
+            <Badge variant="destructive" className="text-[9px] px-1.5 py-0 h-4">-{discountPercent}%</Badge>
           )}
         </div>
 
@@ -55,9 +54,9 @@ export function ProductCard({ product }: ProductCardProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-2 z-10 h-7 w-7 rounded-full bg-background/80 opacity-0 transition-opacity group-hover:opacity-100"
+          className="absolute right-1.5 top-1.5 z-10 h-6 w-6 rounded-full bg-background/70 opacity-0 transition-opacity group-hover:opacity-100"
         >
-          <Heart className="h-3.5 w-3.5" />
+          <Heart className="h-3 w-3" />
         </Button>
 
         {/* Image */}
@@ -73,75 +72,72 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </Link>
 
-        {/* Quick Add */}
-        <div className="absolute bottom-2 left-2 right-2 z-20 pointer-events-none translate-y-full opacity-0 transition-all group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+        {/* Quick Add — inside image on hover */}
+        <div className="absolute bottom-1.5 left-1.5 right-1.5 z-20 pointer-events-none translate-y-full opacity-0 transition-all group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
           <Button
-            className="w-full shadow-md"
+            className="w-full shadow-md h-7 text-xs"
             size="sm"
             onClick={handleAddToCart}
             disabled={product.stock === 0}
             variant={added ? "secondary" : "default"}
           >
             {added ? (
-              <><Check className="mr-1 h-3.5 w-3.5" /> Agregado</>
+              <><Check className="mr-1 h-3 w-3" /> Agregado</>
             ) : (
-              <><ShoppingCart className="mr-1 h-3.5 w-3.5" /> Agregar</>
+              <><ShoppingCart className="mr-1 h-3 w-3" /> Agregar</>
             )}
           </Button>
         </div>
       </div>
 
-      {/* Info — ultra-compact */}
-      <CardContent className="px-2.5 py-2">
-        {/* Columbia-style image swatches */}
+      {/* INFO — minimal, ~25-30% of card height */}
+      <div className="px-2 py-1.5">
+        {/* Swatches — Columbia style */}
         {product.images && product.images.length > 1 && (
-          <div className="flex gap-1 mb-1.5">
+          <div className="flex gap-0.5 mb-1">
             {product.images.map((img, index) => (
               <button
                 key={index}
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveImageIndex(index) }}
                 onMouseEnter={() => setActiveImageIndex(index)}
                 className={cn(
-                  "relative h-6 w-6 shrink-0 overflow-hidden rounded-sm border transition-all",
+                  "relative h-5 w-5 shrink-0 overflow-hidden rounded-[3px] border transition-all",
                   activeImageIndex === index
                     ? "border-foreground ring-1 ring-foreground/20"
-                    : "border-muted hover:border-muted-foreground/50"
+                    : "border-border hover:border-muted-foreground"
                 )}
               >
-                <Image src={img} alt="" fill className="object-cover" sizes="24px" />
+                <Image src={img} alt="" fill className="object-cover" sizes="20px" />
               </button>
             ))}
           </div>
         )}
 
-        {/* Brand + Rating on same line */}
-        <div className="flex items-center justify-between">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{product.brand}</p>
-          <div className="flex items-center gap-0.5">
-            <Star className="h-2.5 w-2.5 fill-yellow-400 text-yellow-400" />
-            <span className="text-[10px] text-muted-foreground">{product.rating}</span>
-          </div>
+        {/* Brand + Rating inline */}
+        <div className="flex items-center gap-1">
+          <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground leading-none">{product.brand}</span>
+          <span className="text-muted-foreground/30">·</span>
+          <Star className="h-2.5 w-2.5 fill-yellow-400 text-yellow-400 shrink-0" />
+          <span className="text-[9px] text-muted-foreground leading-none">{product.rating}</span>
         </div>
 
-        {/* Name — tight */}
+        {/* Name — 1 line */}
         <Link href={`/products/${product.slug}`}>
-          <h3 className="mt-0.5 text-xs font-semibold leading-snug line-clamp-2 hover:text-primary transition-colors">
+          <p className="text-[11px] font-semibold leading-tight line-clamp-1 hover:text-primary transition-colors mt-0.5">
             {product.name}
-          </h3>
+          </p>
         </Link>
 
-        {/* Price — directly after name */}
-        <div className="mt-1 flex items-baseline gap-1.5">
-          <span className="text-sm font-bold">
-            S/ {product.price.toFixed(2)}
-          </span>
+        {/* Price */}
+        <div className="flex items-baseline gap-1 mt-0.5">
+          <span className="text-xs font-bold leading-none">S/ {product.price.toFixed(2)}</span>
           {hasDiscount && (
-            <span className="text-[10px] text-muted-foreground line-through">
+            <span className="text-[9px] text-muted-foreground line-through leading-none">
               S/ {product.originalPrice!.toFixed(2)}
             </span>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
