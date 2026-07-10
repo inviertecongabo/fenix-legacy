@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { writeFileSync, mkdirSync, existsSync } from "fs"
-import { join } from "path"
 import { put, del } from "@vercel/blob"
-import { cloudinary } from "@/lib/cloudinary"
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,21 +33,21 @@ export async function POST(request: NextRequest) {
 
     // ── OPTION A: Vercel Blob Storage (Preferred on Vercel) ──
     if (process.env.BLOB_READ_WRITE_TOKEN) {
-      const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`
+      const filename = `products/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`
       const blob = await put(filename, file, { access: "public" })
       return NextResponse.json({
         url: blob.url,
-        publicId: blob.url, // Use the URL as identifier for deletion
+        publicId: blob.url,
       })
     }
 
     // ── OPTION B: Cloudinary (If credentials are set) ──
-    const hasCloudinary =
+    if (
       process.env.CLOUDINARY_CLOUD_NAME &&
       process.env.CLOUDINARY_API_KEY &&
-      process.env.CLOUDINARY_API_KEY !== "placeholder_key"
-
-    if (hasCloudinary) {
+      process.env.CLOUDINARY_API_SECRET
+    ) {
+      const { cloudinary } = await import("@/lib/cloudinary")
       const bytes = await file.arrayBuffer()
       const buffer = Buffer.from(bytes)
 
@@ -82,7 +79,10 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // ── OPTION C: Local Filesystem Fallback (For local dev without Cloudinary/Vercel) ──
+    // ── OPTION C: Local Filesystem Fallback ──
+    const { writeFileSync, mkdirSync, existsSync } = await import("fs")
+    const { join } = await import("path")
+
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
@@ -95,10 +95,9 @@ export async function POST(request: NextRequest) {
     const filePath = join(uploadDir, filename)
     writeFileSync(filePath, buffer)
 
-    const fileUrl = `/uploads/${filename}`
     return NextResponse.json({
-      url: fileUrl,
-      publicId: `local:${filename}`, // prefix to identify local deletions
+      url: `/uploads/${filename}`,
+      publicId: `local:${filename}`,
     })
   } catch (error) {
     console.error("Error uploading image:", error)
@@ -121,20 +120,27 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // ── Option A: Vercel Blob deletion ──
+    // Vercel Blob deletion
     if (publicId.startsWith("http")) {
       await del(publicId)
       return NextResponse.json({ success: true })
     }
 
-    // ── Option C: Local deletion ──
+    // Local deletion — skip
     if (publicId.startsWith("local:")) {
-      // Local deletions can be skipped or implemented if needed, but not critical for dev
       return NextResponse.json({ success: true })
     }
 
-    // ── Option B: Cloudinary deletion ──
-    await cloudinary.uploader.destroy(publicId)
+    // Cloudinary deletion
+    if (
+      process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET
+    ) {
+      const { cloudinary } = await import("@/lib/cloudinary")
+      await cloudinary.uploader.destroy(publicId)
+    }
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error deleting image:", error)
