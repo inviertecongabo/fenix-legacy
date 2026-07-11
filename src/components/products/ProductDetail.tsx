@@ -35,7 +35,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
   const [selectedSize, setSelectedSize]   = useState("")
   const [selectedColor, setSelectedColor] = useState("")
   const [showSizeGuide, setShowSizeGuide] = useState(false)
-  const [showErrors, setShowErrors]       = useState(false)
+  const [errorMessage, setErrorMessage]   = useState("")
   const addItem = useCartStore((state) => state.addItem)
   const favoriteItems = useFavoritesStore((state) => state.items)
   const addFavorite = useFavoritesStore((state) => state.addItem)
@@ -69,9 +69,19 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
   }
 
   const handleAddToCart = () => {
-    if (needsSize || needsColor) {
-      setShowErrors(true)
-      setTimeout(() => setShowErrors(false), 3000)
+    if (needsSize && needsColor) {
+      setErrorMessage("Por favor selecciona una talla y un color.")
+      setTimeout(() => setErrorMessage(""), 4000)
+      return
+    }
+    if (needsSize) {
+      setErrorMessage("Por favor selecciona una talla antes de agregar al carrito.")
+      setTimeout(() => setErrorMessage(""), 4000)
+      return
+    }
+    if (needsColor) {
+      setErrorMessage("Por favor selecciona un color antes de agregar al carrito.")
+      setTimeout(() => setErrorMessage(""), 4000)
       return
     }
     addItem(product, quantity, selectedSize || undefined, selectedColor || undefined)
@@ -180,7 +190,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
             <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </div>
           {needsSize && (
-            <p className={cn("text-xs transition-colors duration-300", showErrors ? "text-destructive font-bold" : "text-amber-600 dark:text-amber-400")}>
+            <p className="text-xs text-amber-600 dark:text-amber-400">
               Por favor selecciona una talla antes de agregar al carrito.
             </p>
           )}
@@ -209,7 +219,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
             <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </div>
           {needsColor && (
-            <p className={cn("text-xs transition-colors duration-300", showErrors ? "text-destructive font-bold" : "text-amber-600 dark:text-amber-400")}>
+            <p className="text-xs text-amber-600 dark:text-amber-400">
               Por favor selecciona un color antes de agregar al carrito.
             </p>
           )}
@@ -359,6 +369,14 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
               Si estás entre dos tallas, te recomendamos elegir la talla mayor.
             </p>
           </div>
+        </div>
+      )}
+
+      {/* ── CUSTOM ERROR TOAST ── */}
+      {errorMessage && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-lg bg-destructive px-4 py-3 text-sm font-medium text-destructive-foreground shadow-xl animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <X className="h-4 w-4" />
+          {errorMessage}
         </div>
       )}
     </div>
