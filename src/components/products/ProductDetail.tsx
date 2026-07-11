@@ -68,7 +68,15 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
   }
 
   const handleAddToCart = () => {
-    addItem(product, quantity, selectedSize || undefined)
+    if (needsSize) {
+      alert("Por favor selecciona una talla antes de agregar al carrito.")
+      return
+    }
+    if (needsColor) {
+      alert("Por favor selecciona un color antes de agregar al carrito.")
+      return
+    }
+    addItem(product, quantity, selectedSize || undefined, selectedColor || undefined)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }
@@ -229,7 +237,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
 
         <div className="flex flex-1 gap-2">
           <Button className="flex-1" size="lg"
-            disabled={!canAddToCart || added}
+            disabled={product.stock === 0 || added}
             onClick={handleAddToCart}
           >
             {added ? (

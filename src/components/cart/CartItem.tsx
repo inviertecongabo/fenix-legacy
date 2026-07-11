@@ -8,12 +8,12 @@ import { CartItem as CartItemType } from "@/types"
 
 interface CartItemProps {
   item: CartItemType
-  onUpdateQuantity: (productId: string, quantity: number) => void
-  onRemove: (productId: string) => void
+  onUpdateQuantity: (productId: string, quantity: number, size?: string, color?: string) => void
+  onRemove: (productId: string, size?: string, color?: string) => void
 }
 
 export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
-  const { product, quantity } = item
+  const { product, quantity, size, color } = item
 
   return (
     <div className="flex gap-4 py-4">
@@ -34,17 +34,24 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
           <div>
             <p className="text-xs text-muted-foreground">{product.brand}</p>
             <Link
-              href={`/products/${product.id}`}
+              href={`/products/${product.slug}`}
               className="font-medium hover:text-primary transition-colors line-clamp-2"
             >
               {product.name}
             </Link>
+            {(size || color) && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {size && <span>Talla: {size}</span>}
+                {size && color && <span> | </span>}
+                {color && <span>Color: {color}</span>}
+              </p>
+            )}
           </div>
           <Button
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-destructive"
-            onClick={() => onRemove(product.id)}
+            onClick={() => onRemove(product.id, size, color)}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -57,7 +64,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
               variant="ghost"
               size="icon"
               className="h-8 w-8 rounded-r-none"
-              onClick={() => onUpdateQuantity(product.id, quantity - 1)}
+              onClick={() => onUpdateQuantity(product.id, quantity - 1, size, color)}
               disabled={quantity <= 1}
             >
               <Minus className="h-3 w-3" />
@@ -67,7 +74,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
               variant="ghost"
               size="icon"
               className="h-8 w-8 rounded-l-none"
-              onClick={() => onUpdateQuantity(product.id, quantity + 1)}
+              onClick={() => onUpdateQuantity(product.id, quantity + 1, size, color)}
               disabled={quantity >= product.stock}
             >
               <Plus className="h-3 w-3" />
