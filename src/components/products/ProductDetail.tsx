@@ -129,11 +129,11 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
       {/* Price */}
       <div className="flex items-baseline gap-3">
         <span className="text-3xl font-bold text-primary">
-          S/ {product.price.toFixed(2)}
+          $ {product.price.toFixed(2)}
         </span>
         {hasDiscount && (
           <span className="text-lg text-muted-foreground line-through">
-            S/ {product.originalPrice!.toFixed(2)}
+            $ {product.originalPrice!.toFixed(2)}
           </span>
         )}
       </div>
@@ -282,7 +282,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
           <Truck className="h-5 w-5 text-muted-foreground" />
           <div>
             <p className="font-medium">Envío gratis</p>
-            <p className="text-xs text-muted-foreground">En pedidos +S/ 200</p>
+            <p className="text-xs text-muted-foreground">En pedidos +$ 200</p>
           </div>
         </div>
         <div className="flex items-center gap-3 text-sm">

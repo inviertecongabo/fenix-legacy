@@ -170,13 +170,13 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           <span className={cn(
             "font-bold leading-none",
             viewMode === "list" ? "text-lg" : "text-xs"
-          )}>S/ {product.price.toFixed(2)}</span>
+          )}>$ {product.price.toFixed(2)}</span>
           {hasDiscount && (
             <span className={cn(
               "text-muted-foreground line-through leading-none",
               viewMode === "list" ? "text-sm" : "text-[9px]"
             )}>
-              S/ {product.originalPrice!.toFixed(2)}
+              $ {product.originalPrice!.toFixed(2)}
             </span>
           )}
         </div>
