@@ -12,11 +12,12 @@ import { useCartStore } from "@/stores/cart-store"
 
 interface ProductCardProps {
   product: Product
+  viewMode?: "grid" | "list"
 }
 
 const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1629429408209-1f912961dbd8?w=400&h=400&fit=crop"
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem)
   const [added, setAdded] = useState(false)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
@@ -37,9 +38,15 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <div className="group overflow-hidden rounded-lg bg-card border border-border/40 shadow-sm hover:shadow-md transition-shadow">
+    <div className={cn(
+      "group overflow-hidden rounded-lg bg-card border border-border/40 shadow-sm hover:shadow-md transition-shadow",
+      viewMode === "list" ? "flex flex-row" : "flex flex-col"
+    )}>
       {/* IMAGE — tall 3:4 ratio, dominates the card */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-muted">
+      <div className={cn(
+        "relative overflow-hidden bg-muted shrink-0",
+        viewMode === "list" ? "w-32 sm:w-48 min-h-[140px]" : "aspect-[3/4]"
+      )}>
         {/* Badges */}
         <div className="absolute left-1.5 top-1.5 z-10 flex flex-col gap-0.5">
           {product.isNew && (
@@ -91,7 +98,10 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* INFO — minimal, ~25-30% of card height */}
-      <div className="px-2 py-1.5">
+      <div className={cn(
+        "px-2 py-1.5 flex flex-col justify-center",
+        viewMode === "list" ? "p-4 sm:p-6 flex-1" : ""
+      )}>
         {/* Swatches — Columbia style */}
         {product.images && product.images.length > 1 && (
           <div className="flex gap-0.5 mb-1">
@@ -123,16 +133,28 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Name — 1 line */}
         <Link href={`/products/${product.slug}`}>
-          <p className="text-[11px] font-semibold leading-tight line-clamp-1 hover:text-primary transition-colors mt-0.5">
+          <p className={cn(
+            "font-semibold leading-tight hover:text-primary transition-colors mt-0.5",
+            viewMode === "list" ? "text-base sm:text-lg line-clamp-2" : "text-[11px] line-clamp-1"
+          )}>
             {product.name}
           </p>
         </Link>
 
         {/* Price */}
-        <div className="flex items-baseline gap-1 mt-0.5">
-          <span className="text-xs font-bold leading-none">S/ {product.price.toFixed(2)}</span>
+        <div className={cn(
+          "flex items-baseline gap-1",
+          viewMode === "list" ? "mt-2" : "mt-0.5"
+        )}>
+          <span className={cn(
+            "font-bold leading-none",
+            viewMode === "list" ? "text-lg" : "text-xs"
+          )}>S/ {product.price.toFixed(2)}</span>
           {hasDiscount && (
-            <span className="text-[9px] text-muted-foreground line-through leading-none">
+            <span className={cn(
+              "text-muted-foreground line-through leading-none",
+              viewMode === "list" ? "text-sm" : "text-[9px]"
+            )}>
               S/ {product.originalPrice!.toFixed(2)}
             </span>
           )}
