@@ -137,33 +137,25 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
       </div>
 
       {/* Price */}
-      <div>
-        <div className="flex items-baseline gap-3">
-          <span className="text-3xl font-bold text-primary">
-            $ {product.price.toFixed(2)}
-          </span>
-          {hasDiscount && (
-            <span className="text-lg text-muted-foreground line-through">
-              $ {product.originalPrice!.toFixed(2)}
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <span className="text-3xl font-bold text-primary flex items-baseline gap-2">
+          $ {product.price.toFixed(2)}
+          {bcvRate && (
+            <span className="text-sm font-medium text-muted-foreground">
+              (Bs. {(product.price * bcvRate).toFixed(2)})
             </span>
           )}
-        </div>
+        </span>
         
-        {/* Precio en Bs. */}
-        {bcvRate && (
-          <div className="mt-1 flex items-baseline gap-2 text-sm font-medium text-muted-foreground">
-            <span>
-              Aprox. Bs. {(product.price * bcvRate).toFixed(2)}
-            </span>
-            {hasDiscount && (
-              <span className="text-xs line-through opacity-70">
-                Bs. {(product.originalPrice! * bcvRate).toFixed(2)}
+        {hasDiscount && (
+          <span className="text-lg text-muted-foreground flex items-baseline gap-1">
+            <span className="line-through">$ {product.originalPrice!.toFixed(2)}</span>
+            {bcvRate && (
+              <span className="text-sm opacity-80">
+                (Bs. {(product.originalPrice! * bcvRate).toFixed(2)})
               </span>
             )}
-            <span className="text-xs text-muted-foreground/60 font-normal ml-1">
-              (Tasa BCV: {bcvRate.toFixed(2)})
-            </span>
-          </div>
+          </span>
         )}
       </div>
 

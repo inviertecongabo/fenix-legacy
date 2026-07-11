@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
-// Cache the rate for 1 hour
-export const revalidate = 3600
+// Cache the rate for 24 hours (86400 seconds) since BCV updates daily at 4:00 PM
+export const revalidate = 86400
 
 export async function GET() {
   try {
@@ -10,7 +10,7 @@ export async function GET() {
     const timeoutId = setTimeout(() => controller.abort(), 8000)
 
     const response = await fetch("https://www.bcv.org.ve/", {
-      next: { revalidate: 3600 },
+      next: { revalidate: 86400 },
       signal: controller.signal,
       headers: {
         // Mock a standard browser user-agent to prevent basic blocks
