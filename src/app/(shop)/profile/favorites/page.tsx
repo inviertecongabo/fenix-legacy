@@ -4,10 +4,19 @@ import Link from "next/link"
 import { Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { useEffect, useState } from "react"
 import { ProductCard } from "@/components/products/ProductCard"
-import { favorites } from "@/data/mock-user"
+import { useFavoritesStore } from "@/stores/favorites-store"
 
 export default function FavoritesPage() {
+  const favorites = useFavoritesStore((state) => state.items)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
   return (
     <div className="space-y-6">
       <div>
