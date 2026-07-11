@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { Camera, Pencil } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -11,6 +11,14 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useUserStore } from "@/stores/user-store"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 function ProfileSkeleton() {
   return (
@@ -42,12 +50,24 @@ function ProfileSkeleton() {
 }
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession()
+  const { data: session, status, update } = useSession()
   const { orders, fetchOrders } = useUserStore()
+
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
+  const [isEditPasswordOpen, setIsEditPasswordOpen] = useState(false)
+
+  const [nameInput, setNameInput] = useState("")
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMsg, setErrorMsg] = useState("")
 
   useEffect(() => {
     if (session?.user) {
       fetchOrders()
+      setNameInput(session.user.name || "")
     }
   }, [session, fetchOrders])
 
@@ -72,6 +92,54 @@ export default function ProfilePage() {
       .join("")
       .toUpperCase()
       .slice(0, 2)
+  }
+
+  const handleUpdateProfile = async () => {
+    setErrorMsg("")
+    setIsSubmitting(true)
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: nameInput }),
+      })
+      if (!res.ok) throw new Error("Error al actualizar perfil")
+      
+      await update({ name: nameInput })
+      setIsEditProfileOpen(false)
+    } catch (err: any) {
+      setErrorMsg(err.message || "Error desconocido")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleUpdatePassword = async () => {
+    setErrorMsg("")
+    if (newPassword !== confirmPassword) {
+      setErrorMsg("Las contraseñas no coinciden")
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const res = await fetch("/api/user/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      })
+      if (!res.ok) {
+        const errorText = await res.text()
+        throw new Error(errorText || "Error al actualizar contraseña")
+      }
+      setIsEditPasswordOpen(false)
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+    } catch (err: any) {
+      setErrorMsg(err.message || "Error desconocido")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -133,7 +201,7 @@ export default function ProfilePage() {
               Administra tu informacion personal
             </CardDescription>
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => setIsEditProfileOpen(true)}>
             <Pencil className="mr-2 h-4 w-4" />
             Editar
           </Button>
@@ -168,8 +236,9 @@ export default function ProfilePage() {
                 Cambia tu contrasena regularmente
               </p>
             </div>
-            <Button variant="outline">Cambiar</Button>
+            <Button variant="outline" onClick={() => setIsEditPasswordOpen(true)}>Cambiar</Button>
           </div>
+          {/* Ocultamos temporalmente la sección de 2FA
           <Separator />
           <div className="flex items-center justify-between">
             <div>
@@ -180,8 +249,93 @@ export default function ProfilePage() {
             </div>
             <Button variant="outline">Configurar</Button>
           </div>
+          */}
         </CardContent>
       </Card>
+
+      {/* MODAL: Edit Profile */}
+      <Dialog open={isEditProfileOpen} onOpenChange={(open) => {
+        setIsEditProfileOpen(open)
+        if (!open) { setErrorMsg(""); setNameInput(user?.name || "") }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Perfil</DialogTitle>
+            <DialogDescription>
+              Actualiza tu información personal. El correo no se puede cambiar por seguridad.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Nombre completo</Label>
+              <Input 
+                value={nameInput} 
+                onChange={(e) => setNameInput(e.target.value)} 
+                placeholder="Tu nombre completo"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Correo electrónico</Label>
+              <Input value={user?.email || ""} disabled className="bg-muted" />
+            </div>
+            {errorMsg && <p className="text-sm text-red-500">{errorMsg}</p>}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditProfileOpen(false)} disabled={isSubmitting}>Cancelar</Button>
+            <Button onClick={handleUpdateProfile} disabled={isSubmitting || !nameInput.trim()}>
+              {isSubmitting ? "Guardando..." : "Guardar cambios"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL: Change Password */}
+      <Dialog open={isEditPasswordOpen} onOpenChange={(open) => {
+        setIsEditPasswordOpen(open)
+        if (!open) { setErrorMsg(""); setCurrentPassword(""); setNewPassword(""); setConfirmPassword("") }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cambiar Contraseña</DialogTitle>
+            <DialogDescription>
+              Ingresa tu contraseña actual y la nueva contraseña que deseas usar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Contraseña actual</Label>
+              <Input 
+                type="password"
+                value={currentPassword} 
+                onChange={(e) => setCurrentPassword(e.target.value)} 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Nueva contraseña</Label>
+              <Input 
+                type="password"
+                value={newPassword} 
+                onChange={(e) => setNewPassword(e.target.value)} 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Confirmar nueva contraseña</Label>
+              <Input 
+                type="password"
+                value={confirmPassword} 
+                onChange={(e) => setConfirmPassword(e.target.value)} 
+              />
+            </div>
+            {errorMsg && <p className="text-sm text-red-500">{errorMsg}</p>}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditPasswordOpen(false)} disabled={isSubmitting}>Cancelar</Button>
+            <Button onClick={handleUpdatePassword} disabled={isSubmitting || !currentPassword || !newPassword || !confirmPassword}>
+              {isSubmitting ? "Actualizando..." : "Actualizar contraseña"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
