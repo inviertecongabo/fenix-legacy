@@ -36,6 +36,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
   const [selectedColor, setSelectedColor] = useState("")
   const [showSizeGuide, setShowSizeGuide] = useState(false)
   const [errorMessage, setErrorMessage]   = useState("")
+  const [bcvRate, setBcvRate]             = useState<number | null>(null)
   const addItem = useCartStore((state) => state.addItem)
   const favoriteItems = useFavoritesStore((state) => state.items)
   const addFavorite = useFavoritesStore((state) => state.addItem)
@@ -46,6 +47,15 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
   
   useEffect(() => {
     setMounted(true)
+    // Fetch BCV rate
+    fetch("/api/bcv")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && typeof data.rate === "number") {
+          setBcvRate(data.rate)
+        }
+      })
+      .catch((err) => console.error("Error fetching BCV rate:", err))
   }, [])
 
   const hasDiscount = product.originalPrice && product.originalPrice > product.price
@@ -127,14 +137,33 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
       </div>
 
       {/* Price */}
-      <div className="flex items-baseline gap-3">
-        <span className="text-3xl font-bold text-primary">
-          $ {product.price.toFixed(2)}
-        </span>
-        {hasDiscount && (
-          <span className="text-lg text-muted-foreground line-through">
-            $ {product.originalPrice!.toFixed(2)}
+      <div>
+        <div className="flex items-baseline gap-3">
+          <span className="text-3xl font-bold text-primary">
+            $ {product.price.toFixed(2)}
           </span>
+          {hasDiscount && (
+            <span className="text-lg text-muted-foreground line-through">
+              $ {product.originalPrice!.toFixed(2)}
+            </span>
+          )}
+        </div>
+        
+        {/* Precio en Bs. */}
+        {bcvRate && (
+          <div className="mt-1 flex items-baseline gap-2 text-sm font-medium text-muted-foreground">
+            <span>
+              Aprox. Bs. {(product.price * bcvRate).toFixed(2)}
+            </span>
+            {hasDiscount && (
+              <span className="text-xs line-through opacity-70">
+                Bs. {(product.originalPrice! * bcvRate).toFixed(2)}
+              </span>
+            )}
+            <span className="text-xs text-muted-foreground/60 font-normal ml-1">
+              (Tasa BCV: {bcvRate.toFixed(2)})
+            </span>
+          </div>
         )}
       </div>
 
