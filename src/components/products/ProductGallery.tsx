@@ -77,19 +77,12 @@ export function ProductGallery({
         <div
           className="relative aspect-square overflow-hidden rounded-xl bg-muted group cursor-zoom-in"
           onClick={() => setZoomed(true)}
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
-          onMouseMove={handleMouseMove}
         >
           <Image
             src={images[selectedIndex]}
             alt={productName}
             fill
-            className={cn(
-              "object-cover transition-transform duration-200",
-              isHovering ? "scale-[2.5]" : "scale-100"
-            )}
-            style={isHovering ? { transformOrigin: `${mousePos.x}% ${mousePos.y}%` } : {}}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 50vw"
             priority
           />
@@ -162,14 +155,24 @@ export function ProductGallery({
       {zoomed && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 cursor-zoom-out"
-          onClick={() => setZoomed(false)}
+          onClick={() => { setZoomed(false); setIsHovering(false); }}
         >
-          <div className="relative h-[90vmin] w-[90vmin] max-w-3xl">
+          <div 
+            className="relative h-[90vmin] w-[90vmin] max-w-4xl bg-white/5 rounded-lg overflow-hidden cursor-crosshair"
+            onClick={(e) => e.stopPropagation()}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+            onMouseMove={handleMouseMove}
+          >
             <Image
               src={images[selectedIndex]}
               alt={productName}
               fill
-              className="object-contain"
+              className={cn(
+                "transition-transform duration-200",
+                isHovering ? "scale-[2.5] object-cover" : "object-contain"
+              )}
+              style={isHovering ? { transformOrigin: `${mousePos.x}% ${mousePos.y}%` } : {}}
               sizes="90vmin"
             />
           </div>

@@ -36,7 +36,10 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
   const [selectedColor, setSelectedColor] = useState("")
   const [showSizeGuide, setShowSizeGuide] = useState(false)
   const addItem = useCartStore((state) => state.addItem)
-  const { addItem: addFavorite, removeItem: removeFavorite, hasItem: isFavorite } = useFavoritesStore()
+  const favoriteItems = useFavoritesStore((state) => state.items)
+  const addFavorite = useFavoritesStore((state) => state.addItem)
+  const removeFavorite = useFavoritesStore((state) => state.removeItem)
+  const isFavorite = favoriteItems.some((item) => item.id === product.id)
   
   const [mounted, setMounted] = useState(false)
   import("react").then((React) => {
@@ -237,10 +240,10 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
           <Button 
             variant="outline" 
             size="lg"
-            onClick={() => isFavorite(product.id) ? removeFavorite(product.id) : addFavorite(product)}
-            className={cn(mounted && isFavorite(product.id) && "text-red-500 border-red-500/50 bg-red-50/50 hover:bg-red-50 dark:bg-red-950/20 dark:hover:bg-red-950/40")}
+            onClick={() => isFavorite ? removeFavorite(product.id) : addFavorite(product)}
+            className={cn(mounted && isFavorite && "text-red-500 border-red-500/50 bg-red-50/50 hover:bg-red-50 dark:bg-red-950/20 dark:hover:bg-red-950/40")}
           >
-            <Heart className={cn("h-4 w-4 transition-all duration-300", mounted && isFavorite(product.id) && "fill-current scale-110")} />
+            <Heart className={cn("h-4 w-4 transition-all duration-300", mounted && isFavorite && "fill-current scale-110")} />
           </Button>
         </div>
       </div>
