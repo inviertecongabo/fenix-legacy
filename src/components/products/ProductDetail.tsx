@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { Product } from "@/types"
 import { useCartStore } from "@/stores/cart-store"
+import { useFavoritesStore } from "@/stores/favorites-store"
 
 interface ProductDetailProps {
   product: Product
@@ -35,6 +36,12 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
   const [selectedColor, setSelectedColor] = useState("")
   const [showSizeGuide, setShowSizeGuide] = useState(false)
   const addItem = useCartStore((state) => state.addItem)
+  const { addItem: addFavorite, removeItem: removeFavorite, hasItem: isFavorite } = useFavoritesStore()
+  
+  const [mounted, setMounted] = useState(false)
+  import("react").then((React) => {
+    React.useEffect(() => setMounted(true), [])
+  })
 
   const hasDiscount = product.originalPrice && product.originalPrice > product.price
   const discountPercent = hasDiscount
@@ -227,8 +234,13 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
               <><ShoppingCart className="mr-2 h-4 w-4" />Agregar al Carrito</>
             )}
           </Button>
-          <Button variant="outline" size="lg">
-            <Heart className="h-4 w-4" />
+          <Button 
+            variant="outline" 
+            size="lg"
+            onClick={() => isFavorite(product.id) ? removeFavorite(product.id) : addFavorite(product)}
+            className={cn(mounted && isFavorite(product.id) && "text-red-500 border-red-500/50 bg-red-50/50 hover:bg-red-50 dark:bg-red-950/20 dark:hover:bg-red-950/40")}
+          >
+            <Heart className={cn("h-4 w-4 transition-all duration-300", mounted && isFavorite(product.id) && "fill-current scale-110")} />
           </Button>
         </div>
       </div>

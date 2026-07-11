@@ -21,6 +21,15 @@ export function ProductGallery({
 }: ProductGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [zoomed, setZoomed] = useState(false)
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 })
+  const [isHovering, setIsHovering] = useState(false)
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect()
+    const x = ((e.clientX - left) / width) * 100
+    const y = ((e.clientY - top) / height) * 100
+    setMousePos({ x, y })
+  }
 
   // When parent forces a different image (color change), sync internal state
   useEffect(() => {
@@ -68,12 +77,19 @@ export function ProductGallery({
         <div
           className="relative aspect-square overflow-hidden rounded-xl bg-muted group cursor-zoom-in"
           onClick={() => setZoomed(true)}
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
+          onMouseMove={handleMouseMove}
         >
           <Image
             src={images[selectedIndex]}
             alt={productName}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className={cn(
+              "object-cover transition-transform duration-200",
+              isHovering ? "scale-[2.5]" : "scale-100"
+            )}
+            style={isHovering ? { transformOrigin: `${mousePos.x}% ${mousePos.y}%` } : {}}
             sizes="(max-width: 768px) 100vw, 50vw"
             priority
           />
