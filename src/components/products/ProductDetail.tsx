@@ -35,6 +35,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
   const [selectedSize, setSelectedSize]   = useState("")
   const [selectedColor, setSelectedColor] = useState("")
   const [showSizeGuide, setShowSizeGuide] = useState(false)
+  const [showErrors, setShowErrors]       = useState(false)
   const addItem = useCartStore((state) => state.addItem)
   const favoriteItems = useFavoritesStore((state) => state.items)
   const addFavorite = useFavoritesStore((state) => state.addItem)
@@ -68,12 +69,9 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
   }
 
   const handleAddToCart = () => {
-    if (needsSize) {
-      alert("Por favor selecciona una talla antes de agregar al carrito.")
-      return
-    }
-    if (needsColor) {
-      alert("Por favor selecciona un color antes de agregar al carrito.")
+    if (needsSize || needsColor) {
+      setShowErrors(true)
+      setTimeout(() => setShowErrors(false), 3000)
       return
     }
     addItem(product, quantity, selectedSize || undefined, selectedColor || undefined)
@@ -182,7 +180,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
             <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </div>
           {needsSize && (
-            <p className="text-xs text-amber-600 dark:text-amber-400">
+            <p className={cn("text-xs transition-colors duration-300", showErrors ? "text-destructive font-bold" : "text-amber-600 dark:text-amber-400")}>
               Por favor selecciona una talla antes de agregar al carrito.
             </p>
           )}
@@ -211,7 +209,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
             <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </div>
           {needsColor && (
-            <p className="text-xs text-amber-600 dark:text-amber-400">
+            <p className={cn("text-xs transition-colors duration-300", showErrors ? "text-destructive font-bold" : "text-amber-600 dark:text-amber-400")}>
               Por favor selecciona un color antes de agregar al carrito.
             </p>
           )}
