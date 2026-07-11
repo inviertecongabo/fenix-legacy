@@ -239,12 +239,21 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
             )}
           </Button>
           <Button 
+            type="button"
             variant="outline" 
             size="lg"
-            onClick={() => isFavorite ? removeFavorite(product.id) : addFavorite(product)}
-            className={cn(mounted && isFavorite && "text-red-500 border-red-500/50 bg-red-50/50 hover:bg-red-50 dark:bg-red-950/20 dark:hover:bg-red-950/40")}
+            onClick={(e) => {
+              e.preventDefault();
+              isFavorite ? removeFavorite(product.id) : addFavorite(product);
+            }}
+            className={cn(
+              "transition-all duration-300",
+              mounted && isFavorite 
+                ? "text-red-500 border-red-500/50 bg-red-50/50 hover:bg-red-100 hover:text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/40" 
+                : ""
+            )}
           >
-            <Heart className={cn("h-4 w-4 transition-all duration-300", mounted && isFavorite && "fill-current scale-110")} />
+            <Heart className={cn("h-5 w-5 transition-all duration-300", mounted && isFavorite && "fill-current scale-110")} />
           </Button>
         </div>
       </div>
