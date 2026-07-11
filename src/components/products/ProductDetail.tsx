@@ -150,11 +150,6 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
         {hasDiscount && (
           <span className="text-lg text-muted-foreground flex items-baseline gap-1">
             <span className="line-through">$ {product.originalPrice!.toFixed(2)}</span>
-            {bcvRate && (
-              <span className="text-sm opacity-80">
-                (Bs. {(product.originalPrice! * bcvRate).toFixed(2)})
-              </span>
-            )}
           </span>
         )}
       </div>
