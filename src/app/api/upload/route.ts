@@ -34,7 +34,11 @@ export async function POST(request: NextRequest) {
     // ── OPTION A: Vercel Blob Storage (Preferred on Vercel) ──
     if (process.env.BLOB_READ_WRITE_TOKEN) {
       const filename = `products/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`
-      const blob = await put(filename, file, { access: "public" })
+      // Explicitly pass the token to avoid any auto-configuration issues
+      const blob = await put(filename, file, { 
+        access: "public",
+        token: process.env.BLOB_READ_WRITE_TOKEN 
+      })
       return NextResponse.json({
         url: blob.url,
         publicId: blob.url,
@@ -99,10 +103,10 @@ export async function POST(request: NextRequest) {
       url: `/uploads/${filename}`,
       publicId: `local:${filename}`,
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error uploading image:", error)
     return NextResponse.json(
-      { error: "Error al subir la imagen" },
+      { error: "Fallo interno en Vercel: " + (error?.message || String(error)) },
       { status: 500 }
     )
   }
@@ -122,7 +126,7 @@ export async function DELETE(request: NextRequest) {
 
     // Vercel Blob deletion
     if (publicId.startsWith("http")) {
-      await del(publicId)
+      await del(publicId, { token: process.env.BLOB_READ_WRITE_TOKEN })
       return NextResponse.json({ success: true })
     }
 
@@ -142,10 +146,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting image:", error)
     return NextResponse.json(
-      { error: "Error al eliminar la imagen" },
+      { error: "Error al eliminar la imagen: " + (error?.message || String(error)) },
       { status: 500 }
     )
   }
