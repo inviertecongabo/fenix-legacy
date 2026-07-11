@@ -42,8 +42,15 @@ export function ImageUpload({ value = [], onChange, maxImages = 5 }: ImageUpload
           })
 
           if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.error || "Error al subir imagen")
+            const errorText = await response.text()
+            let errorMsg = "Error al subir imagen"
+            try {
+              const errorObj = JSON.parse(errorText)
+              errorMsg = errorObj.error || errorMsg
+            } catch (e) {
+              errorMsg = errorText
+            }
+            throw new Error(errorMsg)
           }
 
           return response.json()
@@ -51,8 +58,9 @@ export function ImageUpload({ value = [], onChange, maxImages = 5 }: ImageUpload
 
         const results = await Promise.all(uploadPromises)
         onChange([...value, ...results])
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error uploading images:", error)
+        alert("Ocurrió un error al subir la foto: " + error.message)
       } finally {
         setUploading(false)
       }
