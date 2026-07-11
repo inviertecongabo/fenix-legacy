@@ -20,11 +20,11 @@ export function ProductGallery({
   onIndexChange,
 }: ProductGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [zoomed, setZoomed] = useState(false)
+  const [zoomActive, setZoomActive] = useState(false)
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 })
-  const [isHovering, setIsHovering] = useState(false)
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!zoomActive) return
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect()
     const x = ((e.clientX - left) / width) * 100
     const y = ((e.clientY - top) / height) * 100
@@ -75,14 +75,23 @@ export function ProductGallery({
       {/* ── Main image ── */}
       <div className="flex-1 flex flex-col gap-3">
         <div
-          className="relative aspect-square overflow-hidden rounded-xl bg-muted group cursor-zoom-in"
-          onClick={() => setZoomed(true)}
+          className={cn(
+            "relative aspect-square overflow-hidden rounded-xl bg-muted group",
+            zoomActive ? "cursor-zoom-out" : "cursor-zoom-in"
+          )}
+          onClick={() => setZoomActive(!zoomActive)}
+          onMouseLeave={() => setZoomActive(false)}
+          onMouseMove={handleMouseMove}
         >
           <Image
             src={images[selectedIndex]}
             alt={productName}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className={cn(
+              "object-cover transition-transform",
+              zoomActive ? "duration-75 scale-[1.8]" : "duration-500 hover:scale-105"
+            )}
+            style={zoomActive ? { transformOrigin: `${mousePos.x}% ${mousePos.y}%` } : { transformOrigin: "center" }}
             sizes="(max-width: 768px) 100vw, 50vw"
             priority
           />
@@ -150,50 +159,6 @@ export function ProductGallery({
           </div>
         )}
       </div>
-
-      {/* ── Lightbox ── */}
-      {zoomed && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 cursor-zoom-out"
-          onClick={() => { setZoomed(false); setIsHovering(false); }}
-        >
-          <div 
-            className="relative h-[90vmin] w-[90vmin] max-w-4xl bg-white/5 rounded-lg overflow-hidden cursor-crosshair"
-            onClick={(e) => e.stopPropagation()}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
-            onMouseMove={handleMouseMove}
-          >
-            <Image
-              src={images[selectedIndex]}
-              alt={productName}
-              fill
-              className={cn(
-                "transition-transform duration-200",
-                isHovering ? "scale-[2.5] object-cover" : "object-contain"
-              )}
-              style={isHovering ? { transformOrigin: `${mousePos.x}% ${mousePos.y}%` } : {}}
-              sizes="90vmin"
-            />
-          </div>
-          {images.length > 1 && (
-            <>
-              <button
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-white/20 hover:bg-white/30 rounded-full p-2"
-                onClick={(e) => { e.stopPropagation(); goToPrev() }}
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </button>
-              <button
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-white/20 hover:bg-white/30 rounded-full p-2"
-                onClick={(e) => { e.stopPropagation(); goToNext() }}
-              >
-                <ChevronRight className="h-6 w-6" />
-              </button>
-            </>
-          )}
-        </div>
-      )}
     </div>
   )
 }
