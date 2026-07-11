@@ -142,7 +142,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
           $ {product.price.toFixed(2)}
           {bcvRate && (
             <span className="text-sm font-medium text-muted-foreground">
-              (Bs. {(product.price * bcvRate).toFixed(2)})
+              (Bs. {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price * bcvRate)})
             </span>
           )}
         </span>
