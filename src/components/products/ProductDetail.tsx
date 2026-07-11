@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Heart, ShoppingCart, Star, Minus, Plus,
   Truck, RotateCcw, ShieldCheck, Check, Ruler, X, ChevronDown
@@ -42,9 +42,10 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
   const isFavorite = favoriteItems.some((item) => item.id === product.id)
   
   const [mounted, setMounted] = useState(false)
-  import("react").then((React) => {
-    React.useEffect(() => setMounted(true), [])
-  })
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const hasDiscount = product.originalPrice && product.originalPrice > product.price
   const discountPercent = hasDiscount
