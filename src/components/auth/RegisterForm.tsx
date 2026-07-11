@@ -10,6 +10,7 @@ import { signIn } from "next-auth/react"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import {
   Card,
   CardContent,
@@ -133,9 +134,8 @@ export function RegisterForm() {
                 <Field className="grid grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel htmlFor="password">Contraseña</FieldLabel>
-                    <Input
+                    <PasswordInput
                       id="password"
-                      type="password"
                       {...register("password")}
                     />
                     {errors.password && (
@@ -146,9 +146,8 @@ export function RegisterForm() {
                     <FieldLabel htmlFor="confirmPassword">
                       Confirmar Contraseña
                     </FieldLabel>
-                    <Input
+                    <PasswordInput
                       id="confirmPassword"
-                      type="password"
                       {...register("confirmPassword")}
                     />
                     {errors.confirmPassword && (
