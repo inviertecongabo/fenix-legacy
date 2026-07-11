@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Heart, ShoppingCart, Star, Check } from "lucide-react"
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { Product } from "@/types"
 import { useCartStore } from "@/stores/cart-store"
+import { useFavoritesStore } from "@/stores/favorites-store"
 
 interface ProductCardProps {
   product: Product
@@ -21,6 +22,16 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem)
   const [added, setAdded] = useState(false)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
+
+  const favoriteItems = useFavoritesStore((state) => state.items)
+  const addFavorite = useFavoritesStore((state) => state.addItem)
+  const removeFavorite = useFavoritesStore((state) => state.removeItem)
+  const isFavorite = favoriteItems.some((item) => item.id === product.id)
+  
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const hasDiscount = product.originalPrice && product.originalPrice > product.price
   const discountPercent = hasDiscount
@@ -61,9 +72,19 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-1.5 top-1.5 z-10 h-6 w-6 rounded-full bg-background/70 opacity-0 transition-opacity group-hover:opacity-100"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            isFavorite ? removeFavorite(product.id) : addFavorite(product)
+          }}
+          className={cn(
+            "absolute right-1.5 top-1.5 z-10 h-6 w-6 rounded-full transition-all",
+            mounted && isFavorite 
+              ? "opacity-100 text-red-500 bg-red-50/90 dark:bg-red-950/50 hover:bg-red-100 dark:hover:bg-red-900/50" 
+              : "opacity-0 group-hover:opacity-100 bg-background/70 hover:bg-background/90"
+          )}
         >
-          <Heart className="h-3 w-3" />
+          <Heart className={cn("h-3 w-3", mounted && isFavorite && "fill-current")} />
         </Button>
 
         {/* Image */}
