@@ -23,16 +23,21 @@ export function OrderSummary({ items }: OrderSummaryProps) {
 
       {/* Items */}
       <div className="mt-4 space-y-3">
-        {items.map((item) => (
-          <div key={item.product.id} className="flex gap-3">
-            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-muted">
-              <Image
-                src={item.product.images[0]}
-                alt={item.product.name}
-                fill
-                className="object-cover"
-                sizes="64px"
-              />
+        {items.map((item) => {
+          const colorIndex = item.color && item.product.colors ? item.product.colors.indexOf(item.color) : -1
+          const imageIndex = colorIndex !== -1 ? Math.min(colorIndex, item.product.images.length - 1) : 0
+          const imageSrc = item.product.images[imageIndex] || item.product.images[0]
+
+          return (
+            <div key={item.product.id} className="flex gap-3">
+              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-muted">
+                <Image
+                  src={imageSrc}
+                  alt={item.product.name}
+                  fill
+                  className="object-cover"
+                  sizes="64px"
+                />
               <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                 {item.quantity}
               </span>
@@ -45,7 +50,8 @@ export function OrderSummary({ items }: OrderSummaryProps) {
               $ {(item.product.price * item.quantity).toFixed(2)}
             </p>
           </div>
-        ))}
+          )
+        })}
       </div>
 
       <Separator className="my-4" />

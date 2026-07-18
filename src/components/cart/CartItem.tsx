@@ -15,12 +15,16 @@ interface CartItemProps {
 export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
   const { product, quantity, size, color } = item
 
+  const colorIndex = color && product.colors ? product.colors.indexOf(color) : -1
+  const imageIndex = colorIndex !== -1 ? Math.min(colorIndex, product.images.length - 1) : 0
+  const imageSrc = product.images[imageIndex] || product.images[0]
+
   return (
     <div className="flex gap-4 py-4">
       {/* Image */}
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-muted">
         <Image
-          src={product.images[0]}
+          src={imageSrc}
           alt={product.name}
           fill
           className="object-cover"
