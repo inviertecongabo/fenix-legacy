@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2, Plus, Minus } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -33,7 +33,6 @@ const productSchema = z.object({
   description: z.string().min(1, "La descripcion es requerida"),
   price: z.number().min(0, "El precio debe ser mayor a 0"),
   comparePrice: z.number().optional(),
-  stock: z.number().min(0, "El stock debe ser mayor o igual a 0"),
   categoryId: z.string().min(1, "La categoria es requerida"),
   brandId: z.string().min(1, "La marca es requerida"),
   isNew: z.boolean(),
@@ -65,6 +64,11 @@ export default function NewProductPage() {
   const [loading, setLoading] = useState(true)
   const [images, setImages] = useState<UploadedImage[]>([])
 
+  // Per-color stock state: { "Blanco": 5, "Rojo": 10 }
+  const [colorStocks, setColorStocks] = useState<Record<string, number>>({})
+  // Global stock (used when no colors defined)
+  const [globalStock, setGlobalStock] = useState<number>(0)
+
   const {
     register,
     handleSubmit,
@@ -76,12 +80,40 @@ export default function NewProductPage() {
     defaultValues: {
       isNew: false,
       isFeatured: false,
-      stock: 0,
       sizes: [],
       colors: "",
       gender: "Unisex",
     },
   })
+
+  const colorsRaw = watch("colors")
+
+  // Parse the comma-separated colors into an array whenever the field changes
+  const parsedColors = useMemo(() => {
+    if (!colorsRaw) return []
+    return colorsRaw
+      .split(",")
+      .map((c) => c.trim())
+      .filter(Boolean)
+  }, [colorsRaw])
+
+  const hasColors = parsedColors.length > 0
+
+  // Sync colorStocks when parsedColors changes
+  // Keep existing values, add new keys, remove deleted keys
+  useEffect(() => {
+    setColorStocks((prev) => {
+      const next: Record<string, number> = {}
+      for (const color of parsedColors) {
+        next[color] = prev[color] ?? 0
+      }
+      return next
+    })
+  }, [parsedColors.join(",")])
+
+  const totalStock = hasColors
+    ? Object.values(colorStocks).reduce((acc, n) => acc + n, 0)
+    : globalStock
 
   useEffect(() => {
     const fetchData = async () => {
@@ -121,14 +153,32 @@ export default function NewProductPage() {
       return
     }
 
+    if (hasColors) {
+      const allFilled = parsedColors.every((c) => colorStocks[c] !== undefined)
+      if (!allFilled) {
+        alert("Por favor define el stock para cada color")
+        return
+      }
+    }
+
     setSaving(true)
     try {
+      // Build a specs object that includes color stock breakdown
+      const stockSpecs: Record<string, string> = {}
+      if (hasColors) {
+        for (const color of parsedColors) {
+          stockSpecs[`Stock_${color}`] = String(colorStocks[color] ?? 0)
+        }
+      }
+
       const response = await fetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
+          stock: totalStock,
           images: images.map((img) => img.url),
+          specs: stockSpecs,
         }),
       })
 
@@ -167,6 +217,7 @@ export default function NewProductPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* ── Información Básica ── */}
         <Card>
           <CardHeader>
             <CardTitle>Informacion Basica</CardTitle>
@@ -271,6 +322,7 @@ export default function NewProductPage() {
           </CardContent>
         </Card>
 
+        {/* ── Tallas y Colores ── */}
         <Card>
           <CardHeader>
             <CardTitle>Tallas y Colores</CardTitle>
@@ -311,10 +363,16 @@ export default function NewProductPage() {
                 placeholder="Ej: Negro Core, Blanco Cloud, Azul"
                 {...register("colors")}
               />
+              {hasColors && (
+                <p className="text-xs text-muted-foreground">
+                  {parsedColors.length} color{parsedColors.length !== 1 ? "es" : ""} detectado{parsedColors.length !== 1 ? "s" : ""}. Define el stock por color abajo.
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
 
+        {/* ── Precio e Inventario ── */}
         <Card>
           <CardHeader>
             <CardTitle>Precio e Inventario</CardTitle>
@@ -323,7 +381,8 @@ export default function NewProductPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-3">
+            {/* Prices */}
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="price">Precio ($)</Label>
                 <Input
@@ -347,22 +406,92 @@ export default function NewProductPage() {
                   {...register("comparePrice", { valueAsNumber: true })}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="stock">Stock</Label>
-                <Input
-                  id="stock"
-                  type="number"
-                  placeholder="0"
-                  {...register("stock", { valueAsNumber: true })}
-                />
-                {errors.stock && (
-                  <p className="text-sm text-destructive">{errors.stock.message}</p>
-                )}
-              </div>
             </div>
+
+            {/* Stock section — changes based on whether colors exist */}
+            {!hasColors ? (
+              /* No colors → single global stock field */
+              <div className="space-y-2">
+                <Label htmlFor="globalStock">Stock total</Label>
+                <Input
+                  id="globalStock"
+                  type="number"
+                  min={0}
+                  placeholder="0"
+                  value={globalStock}
+                  onChange={(e) => setGlobalStock(Math.max(0, parseInt(e.target.value) || 0))}
+                />
+              </div>
+            ) : (
+              /* Has colors → one stock field per color */
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Stock por color</Label>
+                  <span className="text-sm font-semibold text-primary">
+                    Total: {totalStock} unidades
+                  </span>
+                </div>
+                <div className="divide-y divide-border rounded-lg border overflow-hidden">
+                  {parsedColors.map((color) => (
+                    <div
+                      key={color}
+                      className="flex items-center justify-between gap-4 px-4 py-3 bg-card"
+                    >
+                      <span className="font-medium text-sm flex-1">{color}</span>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() =>
+                            setColorStocks((prev) => ({
+                              ...prev,
+                              [color]: Math.max(0, (prev[color] ?? 0) - 1),
+                            }))
+                          }
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={colorStocks[color] ?? 0}
+                          onChange={(e) =>
+                            setColorStocks((prev) => ({
+                              ...prev,
+                              [color]: Math.max(0, parseInt(e.target.value) || 0),
+                            }))
+                          }
+                          className="w-20 text-center h-7 text-sm"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() =>
+                            setColorStocks((prev) => ({
+                              ...prev,
+                              [color]: (prev[color] ?? 0) + 1,
+                            }))
+                          }
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  El stock total ({totalStock}) es la suma de todos los colores y se guardará automáticamente.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
+        {/* ── Imágenes ── */}
         <Card>
           <CardHeader>
             <CardTitle>Imagenes</CardTitle>
@@ -379,6 +508,7 @@ export default function NewProductPage() {
           </CardContent>
         </Card>
 
+        {/* ── Opciones ── */}
         <Card>
           <CardHeader>
             <CardTitle>Opciones</CardTitle>
