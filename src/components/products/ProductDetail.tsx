@@ -66,25 +66,41 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
   const sizes  = Array.isArray(product.sizes)  ? product.sizes.filter(Boolean)  : []
   const colors = Array.isArray(product.colors) ? product.colors.filter(Boolean) : []
 
-  // Build a per-color stock map from specs (keys saved as "Stock_ColorName")
-  const colorStockMap: Record<string, number> = {}
+  // Build a stock map from specs (keys: "Stock_Color::Size", "Stock_Color", or "Stock_Size")
+  const stockMap: Record<string, number> = {}
   if (product.specs) {
     Object.entries(product.specs).forEach(([key, val]) => {
       if (key.startsWith("Stock_")) {
-        const colorName = key.replace("Stock_", "")
-        colorStockMap[colorName] = Number(val)
+        stockMap[key.replace("Stock_", "")] = Number(val)
       }
     })
   }
-  const hasColorStock = Object.keys(colorStockMap).length > 0
+  const hasVariantStock = Object.keys(stockMap).some(k => k.includes("::"))
+  const hasColorOnlyStock = !hasVariantStock && Object.keys(stockMap).some(k => colors.includes(k))
 
-  // Effective stock: if this product has per-color stock AND a color is selected,
-  // show only that color's units; otherwise fall back to the total product stock.
-  const effectiveStock = (
-    hasColorStock && selectedColor && colorStockMap[selectedColor] !== undefined
-  )
-    ? colorStockMap[selectedColor]
-    : product.stock
+  // Effective stock based on what the customer has selected
+  let effectiveStock = product.stock
+  if (hasVariantStock) {
+    if (selectedColor && selectedSize) {
+      // Exact variant lookup
+      const key = `${selectedColor}::${selectedSize}`
+      effectiveStock = stockMap[key] ?? 0
+    } else if (selectedColor) {
+      // Sum all sizes for this color
+      effectiveStock = Object.entries(stockMap)
+        .filter(([k]) => k.startsWith(`${selectedColor}::`))
+        .reduce((sum, [, v]) => sum + v, 0)
+    } else if (selectedSize) {
+      // Sum all colors for this size
+      effectiveStock = Object.entries(stockMap)
+        .filter(([k]) => k.endsWith(`::${selectedSize}`))
+        .reduce((sum, [, v]) => sum + v, 0)
+    }
+  } else if (hasColorOnlyStock && selectedColor) {
+    effectiveStock = stockMap[selectedColor] ?? product.stock
+  }
+
+  const canAddToCart = effectiveStock > 0 && !needsSize && !needsColor
 
   const decreaseQuantity = () => { if (quantity > 1) setQuantity(quantity - 1) }
   const increaseQuantity = () => { if (quantity < effectiveStock) setQuantity(quantity + 1) }
@@ -122,7 +138,6 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
 
   const needsSize  = sizes.length > 0 && !selectedSize
   const needsColor = colors.length > 0 && !selectedColor
-  const canAddToCart = effectiveStock > 0 && !needsSize && !needsColor
 
   return (
     <div className="flex flex-col gap-5">
@@ -179,13 +194,21 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
       <p className="text-sm">
         {effectiveStock > 0 ? (
           <span className="text-green-600 dark:text-green-400">
-            {hasColorStock && selectedColor
-              ? `${effectiveStock} unidades disponibles en ${selectedColor}`
+            {hasVariantStock && selectedColor && selectedSize
+              ? `${effectiveStock} disponible${effectiveStock !== 1 ? "s" : ""} en ${selectedColor} / ${selectedSize}`
+              : hasVariantStock && selectedColor
+              ? `${effectiveStock} disponible${effectiveStock !== 1 ? "s" : ""} en ${selectedColor} (todas las tallas)`
+              : hasColorOnlyStock && selectedColor
+              ? `${effectiveStock} disponible${effectiveStock !== 1 ? "s" : ""} en ${selectedColor}`
               : `${effectiveStock} unidades disponibles`}
           </span>
         ) : (
           <span className="text-destructive">
-            {hasColorStock && selectedColor
+            {hasVariantStock && selectedColor && selectedSize
+              ? `Agotado en ${selectedColor} / talla ${selectedSize}`
+              : hasVariantStock && selectedColor
+              ? `Sin stock en ${selectedColor}`
+              : hasColorOnlyStock && selectedColor
               ? `Agotado en ${selectedColor}`
               : "Agotado"}
           </span>
@@ -222,7 +245,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
             <select
               id="size-select"
               value={selectedSize}
-              onChange={(e) => setSelectedSize(e.target.value)}
+              onChange={(e) => { setSelectedSize(e.target.value); setQuantity(1) }}
               className="w-full appearance-none rounded-lg border-2 border-muted-foreground/30 bg-background px-4 py-2.5 pr-10 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors cursor-pointer"
             >
               <option value="">Selecciona una talla</option>

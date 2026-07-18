@@ -67,9 +67,12 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(true)
   const [images, setImages] = useState<UploadedImage[]>([])
 
-  // Per-color stock state: { "Blanco": 5, "Rojo": 10 }
-  const [colorStocks, setColorStocks] = useState<Record<string, number>>({})
-  // Global stock (used when no colors defined)
+  // Variant stock map. Key formats:
+  //  "Color::Size"  – when both colors AND sizes are defined
+  //  "Color"        – when only colors are defined
+  //  "Size"         – when only sizes are defined
+  const [variantStocks, setVariantStocks] = useState<Record<string, number>>({})
+  // Global stock (used when neither colors nor sizes are defined)
   const [globalStock, setGlobalStock] = useState<number>(0)
 
   const {
@@ -91,6 +94,7 @@ export default function EditProductPage() {
   })
 
   const colorsRaw = watch("colors")
+  const selectedSizes = watch("sizes") || []
 
   // Parse the comma-separated colors into an array whenever the field changes
   const parsedColors = useMemo(() => {
@@ -102,21 +106,36 @@ export default function EditProductPage() {
   }, [colorsRaw])
 
   const hasColors = parsedColors.length > 0
+  const hasSizes  = selectedSizes.length > 0
 
-  // Sync colorStocks when parsedColors changes
-  // Keep existing values, add new keys, remove deleted keys
+  // Sync variantStocks whenever colors or sizes change.
+  // Keeps existing values for surviving keys, drops removed keys.
   useEffect(() => {
-    setColorStocks((prev) => {
+    setVariantStocks((prev) => {
       const next: Record<string, number> = {}
-      for (const color of parsedColors) {
-        next[color] = prev[color] ?? 0
+      if (hasColors && hasSizes) {
+        for (const color of parsedColors) {
+          for (const size of selectedSizes) {
+            const key = `${color}::${size}`
+            next[key] = prev[key] ?? 0
+          }
+        }
+      } else if (hasColors) {
+        for (const color of parsedColors) {
+          next[color] = prev[color] ?? 0
+        }
+      } else if (hasSizes) {
+        for (const size of selectedSizes) {
+          next[size] = prev[size] ?? 0
+        }
       }
       return next
     })
-  }, [parsedColors.join(",")])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parsedColors.join(","), selectedSizes.join(",")])
 
-  const totalStock = hasColors
-    ? Object.values(colorStocks).reduce((acc, n) => acc + n, 0)
+  const totalStock = (hasColors || hasSizes)
+    ? Object.values(variantStocks).reduce((acc, n) => acc + n, 0)
     : globalStock
 
   useEffect(() => {
@@ -175,11 +194,11 @@ export default function EditProductPage() {
           const stocks: Record<string, number> = {}
           Object.keys(product.specs).forEach(key => {
             if (key.startsWith("Stock_")) {
-              const color = key.replace("Stock_", "")
-              stocks[color] = Number(product.specs[key])
+              const variantKey = key.replace("Stock_", "")
+              stocks[variantKey] = Number(product.specs[key])
             }
           })
-          setColorStocks(stocks)
+          setVariantStocks(stocks)
         }
       } catch (error) {
         console.error(error)
@@ -213,11 +232,11 @@ export default function EditProductPage() {
 
     setSaving(true)
     try {
-      // Build a specs object that includes color stock breakdown
+      // Build specs with variant stock breakdown
       const stockSpecs: Record<string, string> = {}
-      if (hasColors) {
-        for (const color of parsedColors) {
-          stockSpecs[`Stock_${color}`] = String(colorStocks[color] ?? 0)
+      if (hasColors || hasSizes) {
+        for (const [key, val] of Object.entries(variantStocks)) {
+          stockSpecs[`Stock_${key}`] = String(val)
         }
       }
 
@@ -458,9 +477,9 @@ export default function EditProductPage() {
               </div>
             </div>
 
-            {/* Stock section — changes based on whether colors exist */}
-            {!hasColors ? (
-              /* No colors → single global stock field */
+            {/* Stock section — adapts to color/size selections */}
+            {!hasColors && !hasSizes ? (
+              /* Neither → single global stock field */
               <div className="space-y-2">
                 <Label htmlFor="globalStock">Stock total</Label>
                 <Input
@@ -473,68 +492,121 @@ export default function EditProductPage() {
                 />
               </div>
             ) : (
-              /* Has colors → one stock field per color */
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Stock por color</Label>
+                  <Label>
+                    {hasColors && hasSizes
+                      ? "Stock por color y talla"
+                      : hasColors
+                      ? "Stock por color"
+                      : "Stock por talla"}
+                  </Label>
                   <span className="text-sm font-semibold text-primary">
                     Total: {totalStock} unidades
                   </span>
                 </div>
-                <div className="divide-y divide-border rounded-lg border overflow-hidden">
-                  {parsedColors.map((color) => (
-                    <div
-                      key={color}
-                      className="flex items-center justify-between gap-4 px-4 py-3 bg-card"
-                    >
-                      <span className="font-medium text-sm flex-1">{color}</span>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() =>
-                            setColorStocks((prev) => ({
-                              ...prev,
-                              [color]: Math.max(0, (prev[color] ?? 0) - 1),
-                            }))
-                          }
-                        >
-                          <Minus className="h-3 w-3" />
-                        </Button>
-                        <Input
-                          type="number"
-                          min={0}
-                          value={colorStocks[color] ?? 0}
-                          onChange={(e) =>
-                            setColorStocks((prev) => ({
-                              ...prev,
-                              [color]: Math.max(0, parseInt(e.target.value) || 0),
-                            }))
-                          }
-                          className="w-20 text-center h-7 text-sm"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() =>
-                            setColorStocks((prev) => ({
-                              ...prev,
-                              [color]: (prev[color] ?? 0) + 1,
-                            }))
-                          }
-                        >
-                          <Plus className="h-3 w-3" />
-                        </Button>
+
+                {hasColors && hasSizes ? (
+                  /* ── MATRIX: color rows × size columns ── */
+                  <div className="overflow-x-auto rounded-lg border">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b bg-muted/50">
+                          <th className="px-3 py-2 text-left font-medium text-muted-foreground">Color \ Talla</th>
+                          {selectedSizes.map((sz) => (
+                            <th key={sz} className="px-3 py-2 text-center font-medium text-muted-foreground min-w-[70px]">
+                              {sz}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {parsedColors.map((color) => (
+                          <tr key={color} className="bg-card">
+                            <td className="px-3 py-2 font-medium whitespace-nowrap">{color}</td>
+                            {selectedSizes.map((sz) => {
+                              const key = `${color}::${sz}`
+                              return (
+                                <td key={sz} className="px-2 py-2 text-center">
+                                  <Input
+                                    type="number"
+                                    min={0}
+                                    value={variantStocks[key] ?? 0}
+                                    onChange={(e) =>
+                                      setVariantStocks((prev) => ({
+                                        ...prev,
+                                        [key]: Math.max(0, parseInt(e.target.value) || 0),
+                                      }))
+                                    }
+                                    className="w-16 text-center h-8 text-sm mx-auto block"
+                                  />
+                                </td>
+                              )
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  /* ── LIST: per color OR per size (with +/- buttons) ── */
+                  <div className="divide-y divide-border rounded-lg border overflow-hidden">
+                    {(hasColors ? parsedColors : selectedSizes).map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center justify-between gap-4 px-4 py-3 bg-card"
+                      >
+                        <span className="font-medium text-sm flex-1">
+                          {hasSizes && !hasColors ? `Talla ${item}` : item}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() =>
+                              setVariantStocks((prev) => ({
+                                ...prev,
+                                [item]: Math.max(0, (prev[item] ?? 0) - 1),
+                              }))
+                            }
+                          >
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <Input
+                            type="number"
+                            min={0}
+                            value={variantStocks[item] ?? 0}
+                            onChange={(e) =>
+                              setVariantStocks((prev) => ({
+                                ...prev,
+                                [item]: Math.max(0, parseInt(e.target.value) || 0),
+                              }))
+                            }
+                            className="w-20 text-center h-7 text-sm"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() =>
+                              setVariantStocks((prev) => ({
+                                ...prev,
+                                [item]: (prev[item] ?? 0) + 1,
+                              }))
+                            }
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground">
-                  El stock total ({totalStock}) es la suma de todos los colores y se guardará automáticamente.
+                  El stock total ({totalStock}) es la suma de todas las variantes y se guardará automáticamente.
                 </p>
               </div>
             )}
