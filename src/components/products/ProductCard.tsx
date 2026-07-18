@@ -3,12 +3,11 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Heart, ShoppingCart, Star, Check } from "lucide-react"
+import { Heart, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { Product } from "@/types"
-import { useCartStore } from "@/stores/cart-store"
 import { useFavoritesStore } from "@/stores/favorites-store"
 
 interface ProductCardProps {
@@ -19,8 +18,6 @@ interface ProductCardProps {
 const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1629429408209-1f912961dbd8?w=400&h=400&fit=crop"
 
 export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
-  const addItem = useCartStore((state) => state.addItem)
-  const [added, setAdded] = useState(false)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
 
   const favoriteItems = useFavoritesStore((state) => state.items)
@@ -39,14 +36,6 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
     : 0
 
   const productImage = product.images?.[activeImageIndex] || PLACEHOLDER_IMAGE
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    addItem(product)
-    setAdded(true)
-    setTimeout(() => setAdded(false), 1500)
-  }
 
   return (
     <div className={cn(
@@ -99,23 +88,6 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
             />
           </div>
         </Link>
-
-        {/* Quick Add — inside image on hover */}
-        <div className="absolute bottom-1.5 left-1.5 right-1.5 z-20 pointer-events-none translate-y-full opacity-0 transition-all group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
-          <Button
-            className="w-full shadow-md h-7 text-xs"
-            size="sm"
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-            variant={added ? "secondary" : "default"}
-          >
-            {added ? (
-              <><Check className="mr-1 h-3 w-3" /> Agregado</>
-            ) : (
-              <><ShoppingCart className="mr-1 h-3 w-3" /> Agregar</>
-            )}
-          </Button>
-        </div>
       </div>
 
       {/* INFO — minimal, ~25-30% of card height */}
