@@ -66,11 +66,32 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
   const sizes  = Array.isArray(product.sizes)  ? product.sizes.filter(Boolean)  : []
   const colors = Array.isArray(product.colors) ? product.colors.filter(Boolean) : []
 
+  // Build a per-color stock map from specs (keys saved as "Stock_ColorName")
+  const colorStockMap: Record<string, number> = {}
+  if (product.specs) {
+    Object.entries(product.specs).forEach(([key, val]) => {
+      if (key.startsWith("Stock_")) {
+        const colorName = key.replace("Stock_", "")
+        colorStockMap[colorName] = Number(val)
+      }
+    })
+  }
+  const hasColorStock = Object.keys(colorStockMap).length > 0
+
+  // Effective stock: if this product has per-color stock AND a color is selected,
+  // show only that color's units; otherwise fall back to the total product stock.
+  const effectiveStock = (
+    hasColorStock && selectedColor && colorStockMap[selectedColor] !== undefined
+  )
+    ? colorStockMap[selectedColor]
+    : product.stock
+
   const decreaseQuantity = () => { if (quantity > 1) setQuantity(quantity - 1) }
-  const increaseQuantity = () => { if (quantity < product.stock) setQuantity(quantity + 1) }
+  const increaseQuantity = () => { if (quantity < effectiveStock) setQuantity(quantity + 1) }
 
   const handleColorChange = (color: string) => {
     setSelectedColor(color)
+    setQuantity(1) // reset quantity so it never exceeds the new color's stock
     // Switch gallery to the image whose index matches the color index
     const colorIndex = colors.indexOf(color)
     if (colorIndex !== -1 && onColorImageChange) {
@@ -101,7 +122,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
 
   const needsSize  = sizes.length > 0 && !selectedSize
   const needsColor = colors.length > 0 && !selectedColor
-  const canAddToCart = product.stock > 0 && !needsSize && !needsColor
+  const canAddToCart = effectiveStock > 0 && !needsSize && !needsColor
 
   return (
     <div className="flex flex-col gap-5">
@@ -156,12 +177,18 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
 
       {/* Stock */}
       <p className="text-sm">
-        {product.stock > 0 ? (
+        {effectiveStock > 0 ? (
           <span className="text-green-600 dark:text-green-400">
-            {product.stock} unidades disponibles
+            {hasColorStock && selectedColor
+              ? `${effectiveStock} unidades disponibles en ${selectedColor}`
+              : `${effectiveStock} unidades disponibles`}
           </span>
         ) : (
-          <span className="text-destructive">Agotado</span>
+          <span className="text-destructive">
+            {hasColorStock && selectedColor
+              ? `Agotado en ${selectedColor}`
+              : "Agotado"}
+          </span>
         )}
       </p>
 
@@ -253,7 +280,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
             </Button>
             <span className="w-12 text-center text-sm font-medium">{quantity}</span>
             <Button variant="ghost" size="icon" className="h-9 w-9 rounded-l-none"
-              onClick={increaseQuantity} disabled={quantity >= product.stock}>
+              onClick={increaseQuantity} disabled={quantity >= effectiveStock}>
               <Plus className="h-4 w-4" />
             </Button>
           </div>
@@ -261,7 +288,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
 
         <div className="flex flex-1 gap-2">
           <Button className="flex-1" size="lg"
-            disabled={product.stock === 0 || added}
+            disabled={effectiveStock === 0 || added}
             onClick={handleAddToCart}
           >
             {added ? (
@@ -318,22 +345,25 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
       </div>
 
       {/* Specs */}
-      {Object.keys(product.specs).length > 0 && (
-        <>
-          <Separator />
-          <div>
-            <h3 className="font-semibold mb-3">Especificaciones</h3>
-            <dl className="grid grid-cols-2 gap-2 text-sm">
-              {Object.entries(product.specs).map(([key, value]) => (
-                <div key={key} className="flex flex-col">
-                  <dt className="text-muted-foreground">{key}</dt>
-                  <dd className="font-medium">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </>
-      )}
+{(() => {
+        const publicSpecs = Object.entries(product.specs).filter(([key]) => !key.startsWith("Stock_"))
+        return publicSpecs.length > 0 ? (
+          <>
+            <Separator />
+            <div>
+              <h3 className="font-semibold mb-3">Especificaciones</h3>
+              <dl className="grid grid-cols-2 gap-2 text-sm">
+                {publicSpecs.map(([key, value]) => (
+                  <div key={key} className="flex flex-col">
+                    <dt className="text-muted-foreground">{key}</dt>
+                    <dd className="font-medium">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </>
+        ) : null
+      })()}
 
       {/* ── SIZE GUIDE MODAL ── */}
       {showSizeGuide && (
