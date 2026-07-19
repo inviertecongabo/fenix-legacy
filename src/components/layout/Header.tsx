@@ -20,6 +20,8 @@ import { MobileNav } from "./MobileNav"
 import { useCartStore } from "@/stores/cart-store"
 import { useFavoritesStore } from "@/stores/favorites-store"
 
+import { Logo } from "./Logo"
+
 export function Header() {
   const [mounted, setMounted] = useState(false)
   const itemCount = useCartStore((state) => state.getItemCount())
@@ -36,12 +38,7 @@ export function Header() {
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <span className="text-sm font-bold text-primary-foreground">FL</span>
-            </div>
-            <span className="hidden text-xl font-bold sm:inline-block">
-              Fénix Legacy
-            </span>
+            <Logo className="h-10 w-10 text-primary" />
           </Link>
 
           {/* Search Bar - Desktop */}
