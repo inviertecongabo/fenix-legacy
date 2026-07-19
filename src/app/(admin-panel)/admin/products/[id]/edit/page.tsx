@@ -96,6 +96,9 @@ export default function EditProductPage() {
   })
 
   const colorsRaw = watch("colors")
+  const watchedCategoryId = watch("categoryId")
+  const watchedBrandId = watch("brandId")
+  const watchedGender = watch("gender")
 
   // Parse the comma-separated colors into an array whenever the field changes
   const parsedColors = useMemo(() => {
@@ -176,8 +179,8 @@ export default function EditProductPage() {
           description: product.description,
           price: product.price,
           comparePrice: product.comparePrice,
-          categoryId: product.category?.id || "",
-          brandId: product.brand?.id || "",
+          categoryId: product.categoryId || "",
+          brandId: product.brandId || "",
           isNew: product.isNew,
           isFeatured: product.isFeatured,
           sizes: product.sizes || [],
@@ -335,12 +338,12 @@ export default function EditProductPage() {
               )}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="categoryId">Categoria</Label>
-                <Select onValueChange={(value) => setValue("categoryId", value)}>
+                <Label htmlFor="categoryId">Categoría</Label>
+                <Select value={watchedCategoryId} onValueChange={(value) => setValue("categoryId", value)}>
                   <SelectTrigger id="categoryId">
-                    <SelectValue placeholder="Seleccionar categoria" />
+                    <SelectValue placeholder="Seleccionar categoría" />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((cat) => (
@@ -356,7 +359,7 @@ export default function EditProductPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="brandId">Marca</Label>
-                <Select onValueChange={(value) => setValue("brandId", value)}>
+                <Select value={watchedBrandId} onValueChange={(value) => setValue("brandId", value)}>
                   <SelectTrigger id="brandId">
                     <SelectValue placeholder="Seleccionar marca" />
                   </SelectTrigger>
@@ -374,7 +377,7 @@ export default function EditProductPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="gender">Género</Label>
-                <Select onValueChange={(value) => setValue("gender", value)} defaultValue="Unisex">
+                <Select value={watchedGender} onValueChange={(value) => setValue("gender", value)}>
                   <SelectTrigger id="gender">
                     <SelectValue placeholder="Seleccionar género" />
                   </SelectTrigger>

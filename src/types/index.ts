@@ -3,7 +3,9 @@ export interface Product {
   name: string
   slug: string
   brand: string
+  brandId?: string
   category: string
+  categoryId?: string
   price: number
   originalPrice?: number
   images: string[]
