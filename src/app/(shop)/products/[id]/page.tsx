@@ -1,6 +1,7 @@
 "use client"
 
 import { use, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 import {
@@ -23,6 +24,7 @@ interface ProductPageProps {
 }
 
 export default function ProductPage({ params }: ProductPageProps) {
+  const router = useRouter()
   const { id } = use(params)
   const [product, setProduct] = useState<Product | null>(null)
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
@@ -102,16 +104,14 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      {/* Back Button - Mobile */}
+      {/* Back Button (preserves filters) */}
       <Button
         variant="ghost"
-        asChild
-        className="mb-4 -ml-2 sm:hidden"
+        onClick={() => router.back()}
+        className="mb-4 -ml-2 text-muted-foreground hover:text-foreground"
       >
-        <Link href="/products">
-          <ChevronLeft className="mr-1 h-4 w-4" />
-          Volver
-        </Link>
+        <ChevronLeft className="mr-1 h-4 w-4" />
+        Volver a los resultados
       </Button>
 
       {/* Breadcrumb - Desktop */}
@@ -122,17 +122,11 @@ export default function ProductPage({ params }: ProductPageProps) {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/products">Productos</BreadcrumbLink>
+            <BreadcrumbLink href="/products">Catálogo de Productos</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/products?category=${product.category}`}>
-              {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage className="max-w-[200px] truncate">
+            <BreadcrumbPage className="max-w-[300px] truncate">
               {product.name}
             </BreadcrumbPage>
           </BreadcrumbItem>
