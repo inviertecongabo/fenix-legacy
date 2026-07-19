@@ -12,258 +12,78 @@ interface AccordionItem {
 const terms: AccordionItem[] = [
   {
     id: 1,
-    title: "¿CUÁNDO SE APLICAN ESTOS TÉRMINOS Y CONDICIONES?",
+    title: "Quiénes Somos",
     content: (
-      <p>
-        Estos Términos y Condiciones se aplican a todas las ofertas, compras y contratos de venta relacionados
-        con la comercialización y suministro de productos por parte de Fénix Legacy a través de fenixlegacy.com
-        (en adelante, la &ldquo;página web&rdquo;). Al comprar cualquier producto a través de la página web,
-        tu aceptación de estos Términos y Condiciones durante el proceso de pedido implica que aceptas su
-        aplicación y te obligas conforme a su contenido. Cualquier excepción o modificación a estos Términos
-        y Condiciones requerirá aceptación previa y por escrito de Fénix Legacy.
-      </p>
+      <div className="space-y-3">
+        <p>
+          Fénix Legacy es una tienda virtual independiente con sede en Caracas, Venezuela, especializada en la comercialización de ropa y accesorios outlet originales de la marca Adidas.
+        </p>
+        <p>
+          <strong>Aclaratoria de marca:</strong> <em>Fénix Legacy</em> opera como un comercializador independiente y no es un distribuidor oficial, franquicia o agente directo de Adidas. Todos los logotipos y marcas registradas mostrados pertenecen a sus respectivos dueños y se utilizan únicamente con fines descriptivos para identificar los productos.
+        </p>
+      </div>
     ),
   },
   {
     id: 2,
-    title: "INFORMACIÓN SOBRE FÉNIX LEGACY",
+    title: "Políticas de Compra",
     content: (
       <div className="space-y-3">
         <p>
-          Fénix Legacy es una tienda online dedicada a la venta de ropa deportiva importada de marcas
-          reconocidas como Adidas, Nike, Puma y Under Armour, al mejor precio de Venezuela.
+          <strong>Disponibilidad de Inventario:</strong> Al tratarse de mercancía outlet, nuestro inventario es limitado. Añadir un artículo al carrito de compras no garantiza su reserva. El producto solo queda apartado una vez que el pago ha sido reportado y confirmado por nuestro equipo.
         </p>
         <p>
-          Para cualquier consulta, puedes contactarnos a través de:
+          <strong>Precios:</strong> Todos los precios publicados están expresados en USD y son precios finales. Si deseas pagar en moneda nacional (Bolívares), el cálculo se realizará en base a la tasa de cambio del día del BCV.
         </p>
-        <ul className="list-disc pl-5 space-y-1">
-          <li>Correo electrónico: ventas@fenixlegacy.com</li>
-          <li>Teléfono: +58 412 1234567</li>
-          <li>Dirección: Sabana Grande, Caracas, Venezuela</li>
-        </ul>
+        <p>
+          <strong>Métodos de Pago:</strong> Aceptamos los siguientes métodos de pago: (Lo que vayamos a poner, aquí, pago movil, transferencia, etc)
+        </p>
       </div>
     ),
   },
   {
     id: 3,
-    title: "NUESTROS PRODUCTOS Y PRECIOS",
+    title: "Políticas de Envío y Entregas (Caracas)",
     content: (
       <div className="space-y-3">
         <p>
-          Todos los precios mostrados en la página web incluyen los impuestos aplicables según la legislación
-          venezolana vigente. Los precios están expresados en dólares americanos (USD) y se calculan con la
-          tasa oficial del Banco Central de Venezuela (BCV) para pagos en bolívares.
+          Actualmente, Fénix Legacy opera exclusivamente con entregas dentro del Área Metropolitana de Caracas. Ofrecemos las siguientes modalidades:
         </p>
         <p>
-          Fénix Legacy se reserva el derecho de modificar los precios en cualquier momento sin previo aviso.
-          Sin embargo, el precio aplicable a tu pedido será el vigente en el momento de la confirmación de
-          la compra.
+          <strong>Entregas Personales (Pick-up):</strong> Las entregas personales gratuitas se realizan previo acuerdo en [Indicar puntos de entrega, ej. Plaza Venezuela, estaciones de metro céntricas, o una dirección específica], en el horario de [Días y horas de atención].
         </p>
         <p>
-          Las imágenes de los productos son ilustrativas. Los colores reales pueden variar ligeramente según
-          la configuración de tu pantalla. Nos esforzamos por garantizar que las descripciones y
-          especificaciones sean lo más precisas posible.
+          <strong>Servicio de Delivery:</strong> Contamos con servicio de entrega a domicilio (delivery) con un costo adicional que varía según la zona de Caracas. El costo exacto del delivery será informado al cliente antes de finalizar la compra.
+        </p>
+        <p>
+          <strong>Responsabilidad de Entrega:</strong> Si el cliente selecciona la opción de delivery, Fénix Legacy garantiza la integridad del producto hasta el momento en que es entregado en la dirección indicada. Es responsabilidad del cliente revisar que la mercancía esté en perfectas condiciones al momento de recibirla.
         </p>
       </div>
     ),
   },
   {
     id: 4,
-    title: "¿CÓMO SE FORMALIZA EL CONTRATO DE COMPRA?",
+    title: "Políticas de Cambios y Devoluciones",
     content: (
       <div className="space-y-3">
         <p>
-          El contrato de compra entre el cliente y Fénix Legacy se formaliza en el momento en que recibes
-          la confirmación de tu pedido por correo electrónico. Dicha confirmación constituye la aceptación
-          formal de tu orden.
+          Nuestra prioridad es tu satisfacción, pero debido a la naturaleza de los productos (Outlet), manejamos normativas estrictas para los cambios:
         </p>
         <p>
-          El proceso de compra es el siguiente:
-        </p>
-        <ol className="list-decimal pl-5 space-y-1">
-          <li>Seleccionas los productos de tu interés y los agregas al carrito.</li>
-          <li>Procedes al pago completando la información de entrega.</li>
-          <li>Confirmas y realizas el pago por el método seleccionado.</li>
-          <li>Recibes un correo de confirmación con los detalles de tu pedido.</li>
-        </ol>
-      </div>
-    ),
-  },
-  {
-    id: 5,
-    title: "DISPONIBILIDAD DE PRODUCTOS Y GESTIÓN DE INVENTARIO",
-    content: (
-      <div className="space-y-3">
-        <p>
-          La disponibilidad de los productos mostrada en la página web refleja el inventario en tiempo real.
-          En caso de que un producto que hayas comprado no esté disponible, te contactaremos de inmediato
-          para ofrecerte una alternativa o proceder con el reembolso correspondiente.
+          <strong>Plazo para reportes:</strong> Si deseas solicitar un cambio (por talla o defecto de fábrica no advertido), debes notificarlo a nuestro equipo de atención en un plazo máximo de [Ej. 24 a 48 horas] desde el momento en que recibiste la prenda. No se aceptarán reclamos fuera de este período.
         </p>
         <p>
-          Fénix Legacy gestiona un sistema de inventario por talla y color para cada prenda. Es
-          responsabilidad del cliente verificar la disponibilidad de la variante exacta (talla y color)
-          antes de confirmar la compra.
+          <strong>Condiciones de la prenda:</strong> Para que un cambio sea aprobado, la ropa debe estar en las mismas condiciones en las que fue entregada: nueva, sin uso, sin lavar, sin olores (perfume o humo) y con absolutamente todas sus etiquetas originales adheridas.
+        </p>
+        <p>
+          <strong>Gastos de logística por cambio:</strong> Si el cambio se debe a un error del cliente (ej. elección incorrecta de talla), los costos de delivery para el cambio correrán por cuenta del comprador. Si el error fue de Fénix Legacy (enviamos un modelo o talla distinta a la facturada), nosotros cubriremos los gastos de traslado.
+        </p>
+        <p>
+          <strong>Reembolsos:</strong> [Decide tu política aquí, ej. En Fénix Legacy no realizamos devoluciones de dinero. Los cambios solo se efectuarán por otra prenda de igual o mayor valor (pagando la diferencia), o se emitirá una nota de crédito a favor del cliente].
         </p>
       </div>
     ),
-  },
-  {
-    id: 6,
-    title: "MÉTODOS DE PAGO",
-    content: (
-      <div className="space-y-3">
-        <p>Fénix Legacy acepta los siguientes métodos de pago:</p>
-        <ul className="list-disc pl-5 space-y-1">
-          <li>Transferencia bancaria en bolívares (Bs.) según tasa BCV del día</li>
-          <li>Pago móvil (Pago Móvil Interbancario)</li>
-          <li>Divisas (dólares americanos en efectivo o transferencia)</li>
-          <li>Zelle</li>
-          <li>Binance Pay (USDT)</li>
-        </ul>
-        <p>
-          Una vez realizado el pago, deberás enviar el comprobante a través de los canales indicados
-          durante el proceso de compra para confirmar tu pedido.
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 7,
-    title: "ENTREGA Y ENVÍOS",
-    content: (
-      <div className="space-y-3">
-        <p>
-          Realizamos envíos a todo el territorio venezolano a través de servicios de encomiendas nacionales
-          de confianza. Los tiempos estimados de entrega son:
-        </p>
-        <ul className="list-disc pl-5 space-y-1">
-          <li>Caracas: 1 a 2 días hábiles</li>
-          <li>Interior del país: 2 a 5 días hábiles</li>
-        </ul>
-        <p>
-          El costo de envío se calcula según el destino y el peso del paquete. Los pedidos superiores a
-          $200 tienen envío gratuito a nivel nacional.
-        </p>
-        <p>
-          Fénix Legacy no se hace responsable por retrasos causados por circunstancias fuera de nuestro
-          control (huelgas, desastres naturales, problemas del operador logístico, etc.).
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 8,
-    title: "DEVOLUCIONES Y CAMBIOS",
-    content: (
-      <div className="space-y-3">
-        <p>
-          Aceptamos devoluciones y cambios dentro de los <strong>30 días</strong> posteriores a la recepción
-          del producto, siempre que se cumplan las siguientes condiciones:
-        </p>
-        <ul className="list-disc pl-5 space-y-1">
-          <li>El producto debe estar en su estado original, sin uso y con todas las etiquetas intactas.</li>
-          <li>Debe contar con el empaque original.</li>
-          <li>Se debe presentar el comprobante de compra.</li>
-        </ul>
-        <p>
-          No se aceptan devoluciones de productos que hayan sido usados, lavados o dañados por el
-          cliente. Los gastos de envío para devoluciones o cambios serán cubiertos por Fénix Legacy en
-          caso de que el producto presente un defecto de fabricación.
-        </p>
-        <p>
-          Para iniciar un proceso de devolución o cambio, contáctanos a ventas@fenixlegacy.com indicando
-          tu número de pedido y el motivo de la devolución.
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 9,
-    title: "GARANTÍA DE LOS PRODUCTOS",
-    content: (
-      <p>
-        Todos nuestros productos cuentan con garantía de <strong>30 días</strong> contra defectos de
-        fabricación. En caso de identificar un defecto, deberás contactarnos dentro de ese lapso con
-        fotografías del producto y descripción del problema. Fénix Legacy evaluará el caso y ofrecerá
-        reemplazo, reparación o reembolso según corresponda, a su criterio.
-      </p>
-    ),
-  },
-  {
-    id: 10,
-    title: "POLÍTICA DE CANCELACIÓN DE PEDIDOS",
-    content: (
-      <div className="space-y-3">
-        <p>
-          Podrás cancelar tu pedido sin costo alguno siempre que la solicitud se realice antes de que el
-          pedido haya sido despachado. Una vez despachado, no será posible cancelar la orden y deberá
-          iniciarse un proceso de devolución.
-        </p>
-        <p>
-          Para cancelar un pedido, escríbenos de inmediato a ventas@fenixlegacy.com con tu número de
-          pedido. Te confirmaremos la cancelación por la misma vía.
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 11,
-    title: "PROTECCIÓN DE DATOS PERSONALES",
-    content: (
-      <div className="space-y-3">
-        <p>
-          Fénix Legacy recopila y procesa tus datos personales (nombre, dirección, correo electrónico,
-          teléfono) exclusivamente para gestionar tu pedido y brindarte una experiencia de compra
-          personalizada.
-        </p>
-        <p>
-          No compartimos tus datos personales con terceros, salvo con los operadores logísticos necesarios
-          para la entrega de tu pedido. Puedes solicitar la eliminación de tus datos en cualquier momento
-          escribiéndonos a ventas@fenixlegacy.com.
-        </p>
-        <p>
-          Para más información, consulta nuestra <a href="/privacy" className="underline text-primary">Política de Privacidad</a>.
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 12,
-    title: "CONDUCTA FRAUDULENTA O ABUSIVA",
-    content: (
-      <p>
-        Fénix Legacy se reserva el derecho de cancelar pedidos y bloquear cuentas en caso de detectar
-        actividad fraudulenta, abusiva o que contravenga estos Términos y Condiciones. Esto incluye,
-        entre otros, el uso de información de pago falsa, intentos de eludir el sistema de inventario
-        o cualquier otra conducta que afecte la operación normal de la tienda o los derechos de otros
-        clientes.
-      </p>
-    ),
-  },
-  {
-    id: 13,
-    title: "MODIFICACIONES A LOS TÉRMINOS Y CONDICIONES",
-    content: (
-      <p>
-        Fénix Legacy se reserva el derecho de actualizar o modificar estos Términos y Condiciones en
-        cualquier momento. Los cambios entrarán en vigor desde el momento de su publicación en la página
-        web. Es responsabilidad del cliente revisar periódicamente estos términos. El uso continuado de
-        la página web después de cualquier modificación constituye la aceptación de los nuevos términos.
-      </p>
-    ),
-  },
-  {
-    id: 14,
-    title: "DERECHO APLICABLE Y JURISDICCIÓN",
-    content: (
-      <p>
-        Estos Términos y Condiciones se rigen por la legislación de la República Bolivariana de Venezuela.
-        Cualquier controversia derivada de su interpretación o aplicación será sometida a los tribunales
-        competentes de la ciudad de Caracas, Venezuela, renunciando expresamente a cualquier otro fuero
-        que pudiera corresponder.
-      </p>
-    ),
-  },
+  }
 ]
 
 function AccordionSection({ item }: { item: AccordionItem }) {
