@@ -88,7 +88,7 @@ export function HeroBanner() {
                       </span>
                       <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
                         {slide.title}
-                        <span className="block text-primary">{slide.subtitle}</span>
+                        <span className="block text-white mt-1 opacity-90 font-medium">{slide.subtitle}</span>
                       </h2>
                       <p className="mt-3 text-sm sm:text-base text-slate-300 max-w-md mx-auto lg:mx-0">
                         {slide.description}
@@ -97,7 +97,7 @@ export function HeroBanner() {
                         <Button asChild size="default">
                           <Link href={slide.href}>{slide.cta}</Link>
                         </Button>
-                        <Button asChild variant="outline" className="border-slate-600 text-white hover:bg-slate-800">
+                        <Button asChild variant="outline" className="bg-transparent border-slate-500 text-white hover:bg-slate-800 hover:text-white">
                           <Link href="/products">Ver Todo</Link>
                         </Button>
                       </div>
