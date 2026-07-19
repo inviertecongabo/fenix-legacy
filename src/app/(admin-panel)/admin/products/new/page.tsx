@@ -71,6 +71,8 @@ export default function NewProductPage() {
   const [variantStocks, setVariantStocks] = useState<Record<string, number>>({})
   // Global stock (used when neither colors nor sizes are defined)
   const [globalStock, setGlobalStock] = useState<number>(0)
+  // Local sizes state (mirrors RHF "sizes" field but stays reactive with checkboxes)
+  const [localSizes, setLocalSizes] = useState<string[]>([])
 
   const {
     register,
@@ -90,7 +92,6 @@ export default function NewProductPage() {
   })
 
   const colorsRaw = watch("colors")
-  const selectedSizes = watch("sizes") || []
 
   // Parse the comma-separated colors into an array whenever the field changes
   const parsedColors = useMemo(() => {
@@ -102,7 +103,7 @@ export default function NewProductPage() {
   }, [colorsRaw])
 
   const hasColors = parsedColors.length > 0
-  const hasSizes  = selectedSizes.length > 0
+  const hasSizes  = localSizes.length > 0
 
   // Sync variantStocks whenever colors or sizes change.
   // Keeps existing values for surviving keys, drops removed keys.
@@ -112,7 +113,7 @@ export default function NewProductPage() {
       if (hasColors && hasSizes) {
         // Matrix: every color × size combination
         for (const color of parsedColors) {
-          for (const size of selectedSizes) {
+          for (const size of localSizes) {
             const key = `${color}::${size}`
             next[key] = prev[key] ?? 0
           }
@@ -122,14 +123,14 @@ export default function NewProductPage() {
           next[color] = prev[color] ?? 0
         }
       } else if (hasSizes) {
-        for (const size of selectedSizes) {
+        for (const size of localSizes) {
           next[size] = prev[size] ?? 0
         }
       }
       return next
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parsedColors.join(","), selectedSizes.join(",")])
+  }, [parsedColors.join(","), localSizes.join(",")])
 
   const totalStock = (hasColors || hasSizes)
     ? Object.values(variantStocks).reduce((acc, n) => acc + n, 0)
@@ -171,14 +172,6 @@ export default function NewProductPage() {
     if (images.length === 0) {
       alert("Debes subir al menos una imagen")
       return
-    }
-
-    if (hasColors) {
-      const allFilled = parsedColors.every((c) => colorStocks[c] !== undefined)
-      if (!allFilled) {
-        alert("Por favor define el stock para cada color")
-        return
-      }
     }
 
     setSaving(true)
@@ -358,14 +351,13 @@ export default function NewProductPage() {
                   <div key={size} className="flex items-center space-x-2">
                     <Checkbox
                       id={`size-${size}`}
-                      checked={(watch("sizes") || []).includes(size)}
+                      checked={localSizes.includes(size)}
                       onCheckedChange={(checked) => {
-                        const currentSizes = watch("sizes") || []
-                        if (checked) {
-                          setValue("sizes", [...currentSizes, size])
-                        } else {
-                          setValue("sizes", currentSizes.filter((s) => s !== size))
-                        }
+                        const next = checked
+                          ? [...localSizes, size]
+                          : localSizes.filter((s) => s !== size)
+                        setLocalSizes(next)
+                        setValue("sizes", next)
                       }}
                     />
                     <Label htmlFor={`size-${size}`} className="font-normal cursor-pointer">
