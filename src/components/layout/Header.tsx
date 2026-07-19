@@ -37,8 +37,8 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <Logo className="h-10 w-10 text-primary" />
+          <Link href="/" className="flex items-center">
+            <Logo className="h-11 w-36 object-contain" />
           </Link>
 
           {/* Search Bar - Desktop */}
