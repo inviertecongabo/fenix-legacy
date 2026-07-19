@@ -19,6 +19,21 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
   const imageIndex = colorIndex !== -1 ? Math.min(colorIndex, product.images.length - 1) : 0
   const imageSrc = product.images[imageIndex] || product.images[0]
 
+  // Resolve effective stock for this specific variant (color+size)
+  const stockMap: Record<string, number> = {}
+  if (product.specs) {
+    Object.entries(product.specs).forEach(([key, val]) => {
+      if (key.startsWith("Stock_")) {
+        stockMap[key.replace("Stock_", "")] = Number(val)
+      }
+    })
+  }
+  const hasVariantStock = Object.keys(stockMap).some(k => k.includes("::"))
+  let variantStock = product.stock
+  if (hasVariantStock && color && size) {
+    variantStock = stockMap[`${color}::${size}`] ?? 0
+  }
+
   return (
     <div className="flex gap-4 py-4">
       {/* Image */}
@@ -79,7 +94,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
               size="icon"
               className="h-8 w-8 rounded-l-none"
               onClick={() => onUpdateQuantity(product.id, quantity + 1, size, color)}
-              disabled={quantity >= product.stock}
+              disabled={quantity >= variantStock}
             >
               <Plus className="h-3 w-3" />
             </Button>

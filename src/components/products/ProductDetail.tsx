@@ -38,6 +38,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
   const [errorMessage, setErrorMessage]   = useState("")
   const [bcvRate, setBcvRate]             = useState<number | null>(null)
   const addItem = useCartStore((state) => state.addItem)
+  const cartItems = useCartStore((state) => state.items)
   const favoriteItems = useFavoritesStore((state) => state.items)
   const addFavorite = useFavoritesStore((state) => state.addItem)
   const removeFavorite = useFavoritesStore((state) => state.removeItem)
@@ -104,8 +105,18 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
   const needsColor = colors.length > 0 && !selectedColor
   const canAddToCart = effectiveStock > 0 && !needsSize && !needsColor
 
+  // How many of this exact variant are already in the cart
+  const inCartQuantity = cartItems.find(
+    (item) =>
+      item.product.id === product.id &&
+      item.size === (selectedSize || undefined) &&
+      item.color === (selectedColor || undefined)
+  )?.quantity ?? 0
+  const remainingStock = Math.max(0, effectiveStock - inCartQuantity)
+  const cartFull = canAddToCart && remainingStock === 0
+
   const decreaseQuantity = () => { if (quantity > 1) setQuantity(quantity - 1) }
-  const increaseQuantity = () => { if (quantity < effectiveStock) setQuantity(quantity + 1) }
+  const increaseQuantity = () => { if (quantity < remainingStock) setQuantity(quantity + 1) }
 
   const handleColorChange = (color: string) => {
     setSelectedColor(color)
@@ -133,7 +144,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
       setTimeout(() => setErrorMessage(""), 4000)
       return
     }
-    addItem(product, quantity, selectedSize || undefined, selectedColor || undefined)
+    addItem(product, quantity, selectedSize || undefined, selectedColor || undefined, effectiveStock)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }
@@ -311,11 +322,13 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
 
         <div className="flex flex-1 gap-2">
           <Button className="flex-1" size="lg"
-            disabled={effectiveStock === 0 || added}
+            disabled={effectiveStock === 0 || added || cartFull}
             onClick={handleAddToCart}
           >
             {added ? (
               <><Check className="mr-2 h-4 w-4" />Agregado</>
+            ) : cartFull ? (
+              <><ShoppingCart className="mr-2 h-4 w-4" />Máximo en carrito</>
             ) : (
               <><ShoppingCart className="mr-2 h-4 w-4" />Agregar al Carrito</>
             )}

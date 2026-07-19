@@ -6,9 +6,9 @@ interface CartState {
   items: CartItem[]
 
   // Actions
-  addItem: (product: Product, quantity?: number, size?: string, color?: string) => void
+  addItem: (product: Product, quantity?: number, size?: string, color?: string, maxStock?: number) => void
   removeItem: (productId: string, size?: string, color?: string) => void
-  updateQuantity: (productId: string, quantity: number, size?: string, color?: string) => void
+  updateQuantity: (productId: string, quantity: number, size?: string, color?: string, maxStock?: number) => void
   clearCart: () => void
 
   // Computed helpers
@@ -21,24 +21,28 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
 
-      addItem: (product, quantity = 1, size, color) => {
+      addItem: (product, quantity = 1, size, color, maxStock) => {
         set((state) => {
           const existingItem = state.items.find(
             (item) => item.product.id === product.id && item.size === size && item.color === color
           )
 
           if (existingItem) {
+            const newQuantity = existingItem.quantity + quantity
+            // Cap at maxStock if provided, otherwise just add
+            const capped = maxStock !== undefined ? Math.min(newQuantity, maxStock) : newQuantity
             return {
               items: state.items.map((item) =>
                 item.product.id === product.id && item.size === size && item.color === color
-                  ? { ...item, quantity: item.quantity + quantity }
+                  ? { ...item, quantity: capped }
                   : item
               ),
             }
           }
 
+          const initialQuantity = maxStock !== undefined ? Math.min(quantity, maxStock) : quantity
           return {
-            items: [...state.items, { product, quantity, size, color }],
+            items: [...state.items, { product, quantity: initialQuantity, size, color }],
           }
         })
       },
@@ -51,16 +55,17 @@ export const useCartStore = create<CartState>()(
         }))
       },
 
-      updateQuantity: (productId, quantity, size, color) => {
+      updateQuantity: (productId, quantity, size, color, maxStock) => {
         if (quantity <= 0) {
           get().removeItem(productId, size, color)
           return
         }
 
+        const capped = maxStock !== undefined ? Math.min(quantity, maxStock) : quantity
         set((state) => ({
           items: state.items.map((item) =>
             item.product.id === productId && item.size === size && item.color === color 
-              ? { ...item, quantity } 
+              ? { ...item, quantity: capped } 
               : item
           ),
         }))
