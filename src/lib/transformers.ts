@@ -34,8 +34,8 @@ export function transformProduct(product: ProductWithRelations): Product {
     isNew: product.isNew,
     isFeatured: product.isFeatured,
     rating: 4.5, // Default rating - could be calculated from reviews in the future
-    sizes: product.sizes ? product.sizes.split(",") : [],
-    colors: product.colors ? product.colors.split(",") : [],
+    sizes: product.sizes ? product.sizes.split(",").map(s => s.trim()).filter(Boolean) : [],
+    colors: product.colors ? product.colors.split(",").map(c => c.trim()).filter(Boolean) : [],
     gender: product.gender,
   }
 }
