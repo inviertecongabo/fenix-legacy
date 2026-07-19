@@ -12,151 +12,73 @@ interface AccordionItem {
 const sections: AccordionItem[] = [
   {
     id: 1,
-    title: "¿Quién es responsable de tus datos?",
+    title: "Información general que recopilamos",
     content: (
-      <div className="space-y-3">
-        <p>
-          El responsable del tratamiento de tus datos personales es <strong>Fénix Legacy</strong>, tienda
-          virtual independiente con sede en Caracas, Venezuela.
-        </p>
-        <ul className="list-disc pl-5 space-y-1">
-          <li>Correo electrónico: ventas@fenixlegacy.com</li>
-          <li>Teléfono: +58 412 1234567</li>
-          <li>Ubicación: Sabana Grande, Caracas, Venezuela</li>
-        </ul>
-      </div>
+      <p>
+        La información general que recopilamos cuando visita nuestro sitio web incluye el dominio desde el que accede a Internet, la dirección de protocolo de Internet ("Dirección IP") del dispositivo que está utilizando y la fecha y hora en que ingresó a nuestra página. Esta información se recopila automáticamente de forma anónima para administrar nuestro sitio, analizar tendencias y mejorar continuamente su experiencia de navegación en nuestra tienda.
+      </p>
     ),
   },
   {
     id: 2,
-    title: "¿Qué información recopilamos?",
+    title: "Información personal que recopilamos",
     content: (
       <div className="space-y-3">
-        <p>Al interactuar con Fénix Legacy, podemos recopilar los siguientes datos:</p>
+        <p>
+          Para brindarle el mejor servicio y procesar la compra de sus artículos, recopilamos información personal únicamente cuando usted nos la proporciona de manera directa y voluntaria (por ejemplo, al crear una cuenta, realizar una compra o contactarnos). Esta información puede incluir:
+        </p>
         <ul className="list-disc pl-5 space-y-1">
-          <li><strong>Datos de identificación:</strong> nombre y apellido.</li>
-          <li><strong>Datos de contacto:</strong> número de teléfono y correo electrónico.</li>
-          <li><strong>Datos de entrega:</strong> dirección de envío dentro del Área Metropolitana de Caracas.</li>
-          <li><strong>Datos de la compra:</strong> productos adquiridos, montos y método de pago utilizado.</li>
-          <li><strong>Datos de navegación:</strong> información técnica básica recopilada automáticamente al usar nuestra página web (tipo de dispositivo, navegador, páginas visitadas).</li>
+          <li>Nombre y apellido.</li>
+          <li>Número de Cédula de Identidad (requerido para facturación).</li>
+          <li>Dirección de correo electrónico y número de teléfono.</li>
+          <li>Dirección de envío detallada para el servicio de delivery en la ciudad de Caracas, o la selección del punto de entrega.</li>
         </ul>
       </div>
     ),
   },
   {
     id: 3,
-    title: "¿Para qué usamos tu información?",
+    title: "Cómo utilizamos la información personal",
     content: (
-      <div className="space-y-3">
-        <p>Utilizamos tus datos personales exclusivamente para las siguientes finalidades:</p>
-        <ul className="list-disc pl-5 space-y-1">
-          <li>Procesar y gestionar tu pedido de compra.</li>
-          <li>Coordinar la entrega o el pick-up de tus productos.</li>
-          <li>Confirmarte el pago y el estado de tu orden.</li>
-          <li>Atender tus solicitudes de cambio o reclamos posventa.</li>
-          <li>Enviarte información sobre nuevas colecciones u ofertas, si has dado tu consentimiento expreso.</li>
-        </ul>
-        <p>
-          No utilizamos tus datos para ningún otro fin no indicado en esta política sin tu autorización previa.
-        </p>
-      </div>
+      <p>
+        Fénix Legacy utiliza su información personal para identificarlo, procesar sus pedidos de ropa, responder a sus solicitudes de atención al cliente, registrarlo para ciertas actividades en el sitio web y confirmar dicho registro, y para ayudar a identificarlo en caso de que pierda su contraseña de acceso a nuestra tienda. Si usted nos otorga su consentimiento, también podremos utilizar esta información para enviarle comunicaciones sobre nuevos ingresos de mercancía, reposición de inventario (restock) u ofertas exclusivas de nuestra tienda.
+      </p>
     ),
   },
   {
     id: 4,
-    title: "¿Compartimos tus datos con terceros?",
+    title: "Empresas contratadas y terceros",
     content: (
       <div className="space-y-3">
         <p>
-          Fénix Legacy <strong>no vende, alquila ni cede</strong> tus datos personales a terceros.
-          Únicamente compartimos información estrictamente necesaria con:
+          Fénix Legacy puede contratar empresas o personal independiente para ayudar a entregar productos o servicios, como una empresa de mensajería o servicio de delivery encargado de entregarle su paquete. En esos casos, es estrictamente necesario compartir su información personal (nombre, teléfono y dirección de entrega) con estas empresas contratadas.
         </p>
-        <ul className="list-disc pl-5 space-y-1">
-          <li><strong>Servicios de delivery:</strong> el nombre, teléfono y dirección de entrega son compartidos con el proveedor logístico para efectuar la entrega de tu pedido.</li>
-          <li><strong>Plataformas de pago:</strong> los datos requeridos para confirmar la transacción (comprobante de pago) son manejados directamente por las plataformas que utilizamos (Pago Móvil, Zelle, etc.).</li>
-        </ul>
         <p>
-          Todos estos terceros están obligados a mantener la confidencialidad de tu información y a utilizarla
-          solo para el fin para el que fue compartida.
+          <strong>Nota importante:</strong> Todas las empresas o personas contratadas para la logística están obligadas contractualmente a mantener la confidencialidad y estricta seguridad de toda la Información Personal. A excepción de este fin logístico indispensable, Fenix Legacy no vende, alquila ni comercializa su información personal con otras empresas.
         </p>
       </div>
     ),
   },
   {
     id: 5,
-    title: "¿Por cuánto tiempo guardamos tus datos?",
+    title: "Enlaces a otros sitios web y aclaratoria de marca",
     content: (
-      <p>
-        Conservamos tus datos personales durante el tiempo necesario para gestionar tu relación comercial
-        con nosotros y cumplir con las obligaciones legales aplicables. Una vez finalizado ese período, o
-        si solicitas la eliminación de tu información, procederemos a eliminarla de forma segura de nuestros
-        registros.
-      </p>
+      <div className="space-y-3">
+        <p>
+          Nuestra Política de Privacidad no aborda la información, las prácticas o las políticas de privacidad y seguridad de ningún otro sitio web.
+        </p>
+        <p>
+          Aunque en Fenix Legacy comercializamos indumentaria y accesorios originales de la marca Adidas, operamos como un comercio local independiente. Esta política no cubre la recopilación de datos que puedan realizar terceros, ni vincula sus datos personales con las plataformas oficiales o bases de datos de Adidas.
+        </p>
+      </div>
     ),
   },
   {
     id: 6,
-    title: "¿Cuáles son tus derechos?",
-    content: (
-      <div className="space-y-3">
-        <p>Como titular de tus datos personales, tienes derecho a:</p>
-        <ul className="list-disc pl-5 space-y-1">
-          <li><strong>Acceder</strong> a la información que tenemos sobre ti.</li>
-          <li><strong>Rectificar</strong> datos incorrectos o desactualizados.</li>
-          <li><strong>Eliminar</strong> tus datos de nuestras bases de datos.</li>
-          <li><strong>Revocar tu consentimiento</strong> para el envío de comunicaciones comerciales en cualquier momento.</li>
-        </ul>
-        <p>
-          Para ejercer cualquiera de estos derechos, escríbenos a{" "}
-          <a href="mailto:ventas@fenixlegacy.com" className="underline text-primary">
-            ventas@fenixlegacy.com
-          </a>{" "}
-          indicando tu nombre y la solicitud específica. Te responderemos a la brevedad posible.
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 7,
-    title: "Uso de Cookies",
-    content: (
-      <div className="space-y-3">
-        <p>
-          Nuestra página web puede utilizar cookies y tecnologías similares para mejorar tu experiencia de
-          navegación, recordar tus preferencias y analizar el tráfico del sitio de forma anónima.
-        </p>
-        <p>
-          Puedes configurar tu navegador para rechazar las cookies o para que te avise cuando se envíe una.
-          Ten en cuenta que algunas funciones del sitio pueden no operar correctamente si deshabilitas
-          las cookies.
-        </p>
-        <p>
-          Para más detalles, consulta nuestra{" "}
-          <a href="/cookies" className="underline text-primary">Política de Cookies</a>.
-        </p>
-      </div>
-    ),
-  },
-  {
-    id: 8,
-    title: "Seguridad de tu información",
+    title: "Seguridad de la información",
     content: (
       <p>
-        Fénix Legacy aplica medidas de seguridad razonables para proteger tus datos personales contra
-        accesos no autorizados, pérdida o divulgación indebida. Sin embargo, ninguna transmisión de datos
-        por Internet puede garantizarse como 100% segura. Te recomendamos no compartir información
-        sensible (como contraseñas o datos bancarios) a través de canales no seguros.
-      </p>
-    ),
-  },
-  {
-    id: 9,
-    title: "Cambios a esta Política de Privacidad",
-    content: (
-      <p>
-        Fénix Legacy se reserva el derecho de actualizar esta Política de Privacidad en cualquier momento.
-        Te notificaremos cualquier cambio relevante publicando la versión actualizada en esta página con
-        la nueva fecha de vigencia. Te recomendamos revisarla periódicamente.
+        Hemos implementado medidas de seguridad administrativas y técnicas razonables para proteger su información contra pérdida, uso indebido o alteración. Si desea actualizar, corregir o eliminar su información personal de nuestra base de datos, o si desea darse de baja de nuestras comunicaciones promocionales, puede comunicarse con nosotros en cualquier momento a través de [Número de ws de aiberson].
       </p>
     ),
   },
