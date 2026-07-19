@@ -24,6 +24,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null
         }
 
+        if (user.status === "SUSPENDED") {
+          throw new Error("Cuenta suspendida. Contacta a soporte.")
+        }
+
         const passwordMatch = await bcrypt.compare(
           credentials.password as string,
           user.password
@@ -48,6 +52,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id as string
         token.role = user.role as string
       }
+
+      // Dynamic check for role changes and suspensions
+      if (token.id) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { role: true, status: true }
+          })
+          
+          if (!dbUser || dbUser.status === "SUSPENDED") {
+            // Force logout by destroying the token
+            return {}
+          }
+          
+          token.role = dbUser.role
+        } catch (e) {
+          console.error("Auth DB Check Error", e)
+        }
+      }
+
       if (trigger === "update" && session?.name) {
         token.name = session.name
       }
