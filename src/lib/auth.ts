@@ -63,7 +63,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           
           if (!dbUser || dbUser.status === "SUSPENDED") {
             // Force logout by destroying the token
-            return {}
+            return null
           }
           
           token.role = dbUser.role
