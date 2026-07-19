@@ -38,7 +38,7 @@ export function Header() {
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <Logo className="h-11 w-36 object-contain" />
+            <Logo />
           </Link>
 
           {/* Search Bar - Desktop */}
