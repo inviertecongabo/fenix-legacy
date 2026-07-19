@@ -31,6 +31,16 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { useAdminStore } from "@/stores/admin-store"
 
 const statusConfig = {
@@ -87,11 +97,33 @@ function UsersSkeleton() {
   )
 }
 
+type ConfirmAction = {
+  type: "MAKE_ADMIN" | "REMOVE_ADMIN" | "SUSPEND" | "REACTIVATE" | null;
+  user: any;
+}
+
 export default function AdminUsersPage() {
   const { users, loading, fetchUsers, updateUserRole, updateUserStatus } = useAdminStore()
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [roleFilter, setRoleFilter] = useState("all")
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction>({ type: null, user: null })
+
+  const handleConfirm = async () => {
+    if (!confirmAction.user || !confirmAction.type) return
+    
+    const { user, type } = confirmAction
+    try {
+      if (type === "MAKE_ADMIN") await updateUserRole(user.id, "admin")
+      if (type === "REMOVE_ADMIN") await updateUserRole(user.id, "customer")
+      if (type === "SUSPEND") await updateUserStatus(user.id, "suspended")
+      if (type === "REACTIVATE") await updateUserStatus(user.id, "active")
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setConfirmAction({ type: null, user: null })
+    }
+  }
 
   useEffect(() => {
     fetchUsers()
@@ -283,23 +315,28 @@ export default function AdminUsersPage() {
                                 <Mail className="mr-2 h-4 w-4" />
                                 Enviar email
                               </DropdownMenuItem>
-                              {user.role !== "admin" && (
-                                <DropdownMenuItem onClick={() => updateUserRole(user.id, "admin")}>
+                              {user.role !== "admin" ? (
+                                <DropdownMenuItem onClick={() => setConfirmAction({ type: "MAKE_ADMIN", user })}>
                                   <Shield className="mr-2 h-4 w-4" />
                                   Hacer admin
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem onClick={() => setConfirmAction({ type: "REMOVE_ADMIN", user })}>
+                                  <Shield className="mr-2 h-4 w-4 text-muted-foreground" />
+                                  Quitar admin
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuSeparator />
                               {user.status !== "suspended" ? (
                                 <DropdownMenuItem 
                                   className="text-destructive"
-                                  onClick={() => updateUserStatus(user.id, "suspended")}
+                                  onClick={() => setConfirmAction({ type: "SUSPEND", user })}
                                 >
                                   <Ban className="mr-2 h-4 w-4" />
                                   Suspender
                                 </DropdownMenuItem>
                               ) : (
-                                <DropdownMenuItem onClick={() => updateUserStatus(user.id, "active")}>
+                                <DropdownMenuItem onClick={() => setConfirmAction({ type: "REACTIVATE", user })}>
                                   Reactivar cuenta
                                 </DropdownMenuItem>
                               )}
@@ -315,6 +352,39 @@ export default function AdminUsersPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={!!confirmAction.type} onOpenChange={() => setConfirmAction({ type: null, user: null })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmAction.type === "MAKE_ADMIN" && "¿Hacer administrador?"}
+              {confirmAction.type === "REMOVE_ADMIN" && "¿Quitar permisos de administrador?"}
+              {confirmAction.type === "SUSPEND" && "¿Suspender usuario?"}
+              {confirmAction.type === "REACTIVATE" && "¿Reactivar cuenta?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmAction.type === "MAKE_ADMIN" && `Estás a punto de otorgar permisos de administrador a ${confirmAction.user?.name}. Tendrá acceso total al panel de control.`}
+              {confirmAction.type === "REMOVE_ADMIN" && `Estás a punto de quitar los permisos de administrador a ${confirmAction.user?.name}. Volverá a ser un cliente normal.`}
+              {confirmAction.type === "SUSPEND" && `Estás a punto de suspender a ${confirmAction.user?.name}. No podrá iniciar sesión ni realizar compras.`}
+              {confirmAction.type === "REACTIVATE" && `Estás a punto de reactivar la cuenta de ${confirmAction.user?.name}. Podrá volver a iniciar sesión y comprar.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={(e) => {
+                e.preventDefault(); // Prevent closing immediately to show loading state if needed
+                handleConfirm();
+              }}
+              disabled={loading}
+              className={confirmAction.type === "SUSPEND" || confirmAction.type === "REMOVE_ADMIN" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+            >
+              {loading ? "Procesando..." : "Confirmar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
