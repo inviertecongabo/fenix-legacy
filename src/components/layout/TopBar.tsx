@@ -6,8 +6,8 @@ export function TopBar() {
       <div className="container mx-auto px-4">
         <div className="flex h-9 items-center justify-between text-xs">
           <div className="flex items-center gap-1 text-xs sm:text-sm">
-            <span className="font-semibold text-white">🔥 Fénix Legacy</span>
-            <span className="hidden sm:inline opacity-90 text-white"> - Tu Outlet Deportivo Premium</span>
+            <span className="font-semibold">🔥 Fénix Legacy</span>
+            <span className="hidden sm:inline opacity-90"> - Tu Outlet Deportivo Premium</span>
           </div>
           <div className="flex items-center gap-4 sm:gap-6">
             <div className="flex items-center gap-1.5">
