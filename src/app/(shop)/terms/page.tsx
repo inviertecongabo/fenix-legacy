@@ -267,7 +267,7 @@ const terms: AccordionItem[] = [
 ]
 
 function AccordionSection({ item }: { item: AccordionItem }) {
-  const [open, setOpen] = useState(item.id === 1)
+  const [open, setOpen] = useState(false)
 
   return (
     <div className="border-b border-border last:border-b-0">
@@ -304,11 +304,10 @@ export default function TermsPage() {
             Términos y Condiciones
           </h1>
           <p className="mt-3 text-muted-foreground">
-            Última actualización: julio 2026
+            Última actualización: 18/7/2026
           </p>
           <p className="mt-4 max-w-2xl mx-auto text-sm text-muted-foreground">
-            Por favor, lee estos Términos y Condiciones cuidadosamente antes de realizar una compra
-            en Fénix Legacy. Al usar nuestra página web, aceptas cumplir con lo aquí establecido.
+            Bienvenido a Fénix Legacy. Al acceder, navegar y realizar una compra en nuestro sitio web o a través de nuestros canales de atención, aceptas los siguientes Términos y Condiciones. Te invitamos a leerlos detenidamente antes de concretar tu pedido.
           </p>
         </div>
       </section>
