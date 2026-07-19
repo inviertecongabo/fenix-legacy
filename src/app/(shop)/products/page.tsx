@@ -55,6 +55,21 @@ function ProductsContent() {
     setFilters(newFilters)
   }, [setFilters])
 
+  // Save active filters to sessionStorage so the product detail page can reconstruct the back URL
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (filters.categories.length > 0) {
+      filters.categories.forEach(c => params.append("category", c))
+    }
+    if (filters.genders && filters.genders.length > 0) {
+      filters.genders.forEach(g => params.append("gender", g))
+    }
+    if (filters.brands.length > 0) {
+      filters.brands.forEach(b => params.append("brand", b))
+    }
+    sessionStorage.setItem("productListParams", params.toString())
+  }, [filters])
+
   const activeFilterCount =
     filters.brands.length +
     filters.categories.length +

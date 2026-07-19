@@ -31,6 +31,33 @@ export default function ProductPage({ params }: ProductPageProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [colorImageIndex, setColorImageIndex] = useState(0)
+  const [backUrl, setBackUrl] = useState("/products")
+  const [backLabel, setBackLabel] = useState("Catálogo de Productos")
+
+  // On mount, read saved filters from sessionStorage to reconstruct the back URL and breadcrumb label
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("productListParams")
+      if (saved) {
+        const params = new URLSearchParams(saved)
+        const categories = params.getAll("category")
+        const genders = params.getAll("gender")
+        const brands = params.getAll("brand")
+        const hasFilters = categories.length > 0 || genders.length > 0 || brands.length > 0
+        if (hasFilters) {
+          setBackUrl(`/products?${saved}`)
+          // Build a human-readable label
+          const parts: string[] = []
+          if (categories.length > 0) parts.push(categories.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(" / "))
+          if (genders.length > 0) parts.push(genders.join(" / "))
+          if (brands.length > 0) parts.push(brands.join(" / "))
+          setBackLabel(parts.join(" · "))
+        }
+      }
+    } catch (_) {
+      // sessionStorage not available (SSR guard)
+    }
+  }, [])
 
   useEffect(() => {
     async function fetchProduct() {
@@ -122,7 +149,7 @@ export default function ProductPage({ params }: ProductPageProps) {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/products">Catálogo de Productos</BreadcrumbLink>
+            <BreadcrumbLink href={backUrl}>{backLabel}</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
