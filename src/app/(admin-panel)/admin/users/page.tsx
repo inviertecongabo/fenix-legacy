@@ -88,7 +88,7 @@ function UsersSkeleton() {
 }
 
 export default function AdminUsersPage() {
-  const { users, loading, fetchUsers } = useAdminStore()
+  const { users, loading, fetchUsers, updateUserRole, updateUserStatus } = useAdminStore()
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [roleFilter, setRoleFilter] = useState("all")
@@ -273,28 +273,33 @@ export default function AdminUsersPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
-                                <Eye className="mr-2 h-4 w-4" />
-                                Ver perfil
+                              <DropdownMenuItem asChild>
+                                <Link href={`/admin/users/${user.id}`}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  Ver perfil
+                                </Link>
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => window.location.href = `mailto:${user.email}`}>
                                 <Mail className="mr-2 h-4 w-4" />
                                 Enviar email
                               </DropdownMenuItem>
                               {user.role !== "admin" && (
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateUserRole(user.id, "admin")}>
                                   <Shield className="mr-2 h-4 w-4" />
                                   Hacer admin
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuSeparator />
                               {user.status !== "suspended" ? (
-                                <DropdownMenuItem className="text-destructive">
+                                <DropdownMenuItem 
+                                  className="text-destructive"
+                                  onClick={() => updateUserStatus(user.id, "suspended")}
+                                >
                                   <Ban className="mr-2 h-4 w-4" />
                                   Suspender
                                 </DropdownMenuItem>
                               ) : (
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateUserStatus(user.id, "active")}>
                                   Reactivar cuenta
                                 </DropdownMenuItem>
                               )}

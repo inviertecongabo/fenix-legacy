@@ -89,6 +89,8 @@ interface AdminState {
   fetchOrders: (params?: { status?: string; limit?: number; offset?: number }) => Promise<void>
   fetchUsers: (params?: { role?: string; status?: string }) => Promise<void>
   updateOrderStatus: (id: string, status: string) => Promise<void>
+  updateUserRole: (id: string, role: string) => Promise<void>
+  updateUserStatus: (id: string, status: string) => Promise<void>
 }
 
 export const useAdminStore = create<AdminState>((set, get) => ({
@@ -167,6 +169,40 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
       // Refresh orders after update
       await get().fetchOrders()
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false })
+      throw error
+    }
+  },
+
+  updateUserRole: async (id, role) => {
+    set({ loading: true, error: null })
+    try {
+      const response = await fetch(`/api/users/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: role.toUpperCase() }),
+      })
+      if (!response.ok) throw new Error("Error updating user role")
+      
+      await get().fetchUsers()
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false })
+      throw error
+    }
+  },
+
+  updateUserStatus: async (id, status) => {
+    set({ loading: true, error: null })
+    try {
+      const response = await fetch(`/api/users/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: status.toUpperCase() }),
+      })
+      if (!response.ok) throw new Error("Error updating user status")
+      
+      await get().fetchUsers()
     } catch (error) {
       set({ error: (error as Error).message, loading: false })
       throw error
