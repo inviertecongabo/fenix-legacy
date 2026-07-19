@@ -27,21 +27,27 @@ function ProductsContent() {
 
   // Initialize filters from URL params
   useEffect(() => {
-    const category = searchParams.get("category")
+    const categories = searchParams.getAll("category")
+    const genders = searchParams.getAll("genders")
+    const brands = searchParams.getAll("brand")
     const featured = searchParams.get("featured")
 
-    const initialFilters: Partial<FilterState> = {}
-    if (category) {
-      initialFilters.categories = [category]
+    // Reset to defaults first so stale state from a previous visit doesn't bleed through
+    const initialFilters: FilterState = {
+      categories: categories.length > 0 ? categories : [],
+      genders: genders.length > 0 ? genders : [],
+      brands: brands.length > 0 ? brands : [],
+      priceRange: [0, 500],
+      sortBy: "newest",
+      sizes: [],
+      colors: [],
     }
+
     if (featured === "true") {
       // This will be handled in the API call
     }
 
-    if (Object.keys(initialFilters).length > 0) {
-      setFilters(initialFilters)
-    }
-
+    setFilters(initialFilters)
     fetchCategories()
     fetchBrands()
   }, [searchParams, setFilters, fetchCategories, fetchBrands])
@@ -56,13 +62,14 @@ function ProductsContent() {
   }, [setFilters])
 
   // Save active filters to sessionStorage so the product detail page can reconstruct the back URL
+  // NOTE: key names must match the URL params that the products page reads (category, genders, brand)
   useEffect(() => {
     const params = new URLSearchParams()
     if (filters.categories.length > 0) {
       filters.categories.forEach(c => params.append("category", c))
     }
     if (filters.genders && filters.genders.length > 0) {
-      filters.genders.forEach(g => params.append("gender", g))
+      filters.genders.forEach(g => params.append("genders", g))
     }
     if (filters.brands.length > 0) {
       filters.brands.forEach(b => params.append("brand", b))

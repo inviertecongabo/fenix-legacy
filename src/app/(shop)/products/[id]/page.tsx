@@ -41,7 +41,7 @@ export default function ProductPage({ params }: ProductPageProps) {
       if (saved) {
         const params = new URLSearchParams(saved)
         const categories = params.getAll("category")
-        const genders = params.getAll("gender")
+        const genders = params.getAll("genders")
         const brands = params.getAll("brand")
         const hasFilters = categories.length > 0 || genders.length > 0 || brands.length > 0
         if (hasFilters) {
