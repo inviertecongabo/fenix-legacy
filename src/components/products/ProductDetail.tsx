@@ -193,7 +193,7 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
       {/* Stock */}
       <p className="text-sm">
         {effectiveStock > 0 ? (
-          <span className="text-green-600 dark:text-green-400">
+          <span className="text-red-600 font-semibold dark:text-red-500">
             {hasVariantStock && selectedColor && selectedSize
               ? `${effectiveStock} disponible${effectiveStock !== 1 ? "s" : ""} en ${selectedColor} / ${selectedSize}`
               : hasVariantStock && selectedColor
