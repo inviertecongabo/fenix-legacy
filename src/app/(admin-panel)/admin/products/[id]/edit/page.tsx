@@ -510,7 +510,7 @@ export default function EditProductPage() {
                       <thead>
                         <tr className="border-b bg-muted/50">
                           <th className="px-3 py-2 text-left font-medium text-muted-foreground">Color \ Talla</th>
-                          {selectedSizes.map((sz) => (
+                          {localSizes.map((sz) => (
                             <th key={sz} className="px-3 py-2 text-center font-medium text-muted-foreground min-w-[70px]">
                               {sz}
                             </th>
@@ -521,7 +521,7 @@ export default function EditProductPage() {
                         {parsedColors.map((color) => (
                           <tr key={color} className="bg-card">
                             <td className="px-3 py-2 font-medium whitespace-nowrap">{color}</td>
-                            {selectedSizes.map((sz) => {
+                            {localSizes.map((sz) => {
                               const key = `${color}::${sz}`
                               return (
                                 <td key={sz} className="px-2 py-2 text-center">
@@ -548,7 +548,7 @@ export default function EditProductPage() {
                 ) : (
                   /* ── LIST: per color OR per size (with +/- buttons) ── */
                   <div className="divide-y divide-border rounded-lg border overflow-hidden">
-                    {(hasColors ? parsedColors : selectedSizes).map((item) => (
+                    {(hasColors ? parsedColors : localSizes).map((item) => (
                       <div
                         key={item}
                         className="flex items-center justify-between gap-4 px-4 py-3 bg-card"

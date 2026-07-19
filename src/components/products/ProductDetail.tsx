@@ -100,6 +100,8 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
     effectiveStock = stockMap[selectedColor] ?? product.stock
   }
 
+  const needsSize  = sizes.length > 0 && !selectedSize
+  const needsColor = colors.length > 0 && !selectedColor
   const canAddToCart = effectiveStock > 0 && !needsSize && !needsColor
 
   const decreaseQuantity = () => { if (quantity > 1) setQuantity(quantity - 1) }
@@ -136,8 +138,6 @@ export function ProductDetail({ product, onColorImageChange }: ProductDetailProp
     setTimeout(() => setAdded(false), 2000)
   }
 
-  const needsSize  = sizes.length > 0 && !selectedSize
-  const needsColor = colors.length > 0 && !selectedColor
 
   return (
     <div className="flex flex-col gap-5">
