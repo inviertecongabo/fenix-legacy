@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
+import { Resend } from "resend"
+import crypto from "crypto"
+
+// Initialize Resend with an API key from env (we'll provide instructions to add it)
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,7 +34,7 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create user
+    // Create user (emailVerified is null by default)
     const user = await prisma.user.create({
       data: {
         name,
@@ -38,13 +43,44 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Generate Verification Token
+    const token = crypto.randomUUID()
+    const expires = new Date(new Date().getTime() + 1000 * 60 * 60 * 24) // 24 hours
+
+    await prisma.verificationToken.create({
+      data: {
+        identifier: email,
+        token,
+        expires,
+      },
+    })
+
+    // Send Verification Email
+    const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/verify-email?token=${token}`
+
+    try {
+      await resend.emails.send({
+        from: "Fénix Legacy <onboarding@resend.dev>", // Change to your verified domain later
+        to: email,
+        subject: "Confirma tu correo electrónico - Fénix Legacy",
+        html: `
+          <div style="font-family: sans-serif; padding: 20px;">
+            <h2>¡Hola ${name}!</h2>
+            <p>Gracias por registrarte en Fénix Legacy.</p>
+            <p>Por favor, confirma tu correo electrónico haciendo clic en el siguiente enlace:</p>
+            <a href="${verificationUrl}" style="display: inline-block; padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 10px;">Confirmar Correo</a>
+            <p style="margin-top: 20px; font-size: 12px; color: #666;">Si no creaste esta cuenta, puedes ignorar este correo.</p>
+          </div>
+        `,
+      })
+    } catch (emailError) {
+      console.error("Error sending verification email:", emailError)
+      // We don't fail the registration if email fails, but we should log it
+    }
+
     return NextResponse.json(
       {
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        },
+        message: "Usuario registrado. Por favor, revisa tu correo para confirmar tu cuenta.",
       },
       { status: 201 }
     )

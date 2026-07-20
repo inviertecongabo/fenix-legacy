@@ -1,10 +1,19 @@
 import NextAuth from "next-auth"
+import { PrismaAdapter } from "@auth/prisma-adapter"
 import Credentials from "next-auth/providers/credentials"
+import Google from "next-auth/providers/google"
+import Apple from "next-auth/providers/apple"
 import bcrypt from "bcryptjs"
 import { prisma } from "./prisma"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  adapter: PrismaAdapter(prisma),
+  session: {
+    strategy: "jwt",
+  },
   providers: [
+    Google,
+    Apple,
     Credentials({
       name: "credentials",
       credentials: {
@@ -23,9 +32,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!user) {
           return null
         }
+        
+        if (!user.password) {
+          throw new Error("Parece que te registraste con Google o Apple. Inicia sesión con esa opción.")
+        }
 
         if (user.status === "SUSPENDED") {
           throw new Error("Cuenta suspendida. Contacta a soporte.")
+        }
+        
+        if (!user.emailVerified) {
+          throw new Error("Por favor, verifica tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.")
         }
 
         const passwordMatch = await bcrypt.compare(
@@ -87,8 +104,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   pages: {
     signIn: "/login",
-  },
-  session: {
-    strategy: "jwt",
   },
 })
