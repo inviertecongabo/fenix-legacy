@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Send Verification Email
-    const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/verify-email?token=${token}`
+    const verificationUrl = `${request.nextUrl.origin}/verify-email?token=${token}`
 
     try {
       await resend.emails.send({
