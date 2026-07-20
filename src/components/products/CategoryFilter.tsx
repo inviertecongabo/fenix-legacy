@@ -53,9 +53,6 @@ export function CategoryFilter({
                 className="flex flex-1 cursor-pointer items-center justify-between text-sm"
               >
                 <span>{category.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  {category.productCount}
-                </span>
               </Label>
             </div>
           ))}

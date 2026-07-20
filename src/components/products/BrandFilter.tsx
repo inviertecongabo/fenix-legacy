@@ -68,9 +68,6 @@ export function BrandFilter({ selectedBrands, onBrandsChange }: BrandFilterProps
                   className="flex flex-1 cursor-pointer items-center justify-between text-sm"
                 >
                   <span>{brand.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {brand.productCount}
-                  </span>
                 </Label>
               </div>
             ))}
