@@ -208,6 +208,7 @@ export function RegisterForm() {
               </form>
             </>
           )}
+        </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
         Al continuar, aceptas nuestros{" "}

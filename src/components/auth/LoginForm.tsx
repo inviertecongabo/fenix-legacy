@@ -67,6 +67,7 @@ export function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Social Buttons */}
           <div className="flex flex-col gap-3 mb-2">
             <Button variant="outline" type="button" onClick={() => signIn("google", { callbackUrl })}>
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -84,6 +85,8 @@ export function LoginForm() {
               Continuar con Apple
             </Button>
           </div>
+          
+          {/* Divider */}
           <div className="relative mb-2">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
@@ -92,7 +95,9 @@ export function LoginForm() {
               <span className="bg-card px-2 text-muted-foreground">O inicia sesión con email</span>
             </div>
           </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+          {/* Credentials Form */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {error && (
               <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
                 {error}
@@ -127,9 +132,7 @@ export function LoginForm() {
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
-          </CardContent>
 
-          <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
@@ -147,8 +150,8 @@ export function LoginForm() {
                 Regístrate
               </Link>
             </p>
-          </CardFooter>
-        </form>
+          </form>
+        </CardContent>
       </Card>
     </div>
   )

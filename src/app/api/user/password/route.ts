@@ -25,6 +25,10 @@ export async function POST(req: Request) {
       return new NextResponse("Usuario no encontrado", { status: 404 })
     }
 
+    if (!user.password) {
+      return new NextResponse("Esta cuenta no usa contraseña. Inicia sesión con Google o Apple.", { status: 400 })
+    }
+
     const passwordMatch = await bcrypt.compare(currentPassword, user.password)
     if (!passwordMatch) {
       return new NextResponse("Contraseña actual incorrecta", { status: 400 })
