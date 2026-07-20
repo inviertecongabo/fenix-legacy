@@ -178,7 +178,7 @@ export default function EditProductPage() {
           slug: product.slug,
           description: product.description,
           price: product.price,
-          comparePrice: product.comparePrice,
+          comparePrice: product.originalPrice,
           categoryId: product.categoryId || "",
           brandId: product.brandId || "",
           isNew: product.isNew,
