@@ -4,10 +4,10 @@ import { prisma } from "@/lib/prisma"
 import { Resend } from "resend"
 import crypto from "crypto"
 
-// Initialize Resend with an API key from env (we'll provide instructions to add it)
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function POST(request: NextRequest) {
+  // Initialize inside handler so it only runs at request time, not build time
+  const resend = new Resend(process.env.RESEND_API_KEY)
+
   try {
     const body = await request.json()
     const { name, email, password } = body
