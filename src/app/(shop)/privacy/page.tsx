@@ -82,6 +82,32 @@ const sections: AccordionItem[] = [
       </p>
     ),
   },
+  {
+    id: 7,
+    title: "Uso de Cookies",
+    content: (
+      <div className="space-y-3">
+        <p>
+          Nuestra página web puede utilizar cookies y tecnologías similares para mejorar tu experiencia de navegación, recordar tus preferencias y analizar el tráfico del sitio de forma anónima.
+        </p>
+        <p>
+          Puedes configurar tu navegador para rechazar las cookies o para que te avise cuando se envíe una. Ten en cuenta que algunas funciones del sitio pueden no operar correctamente si deshabilitas las cookies.
+        </p>
+        <p>
+          Para más detalles, consulta nuestra <span className="underline">Política de Cookies</span>.
+        </p>
+      </div>
+    ),
+  },
+  {
+    id: 8,
+    title: "Cambios a esta Política de Privacidad",
+    content: (
+      <p>
+        Fénix Legacy se reserva el derecho de actualizar esta Política de Privacidad en cualquier momento. Te notificaremos cualquier cambio relevante publicando la versión actualizada en esta página con la nueva fecha de vigencia. Te recomendamos revisarla periódicamente.
+      </p>
+    ),
+  }
 ]
 
 function AccordionSection({ item }: { item: AccordionItem }) {
@@ -122,7 +148,7 @@ export default function PrivacyPage() {
             Política de Privacidad
           </h1>
           <p className="mt-3 text-muted-foreground">
-            Última actualización: 18/7/2026
+            Última actualización: 20/07/2026
           </p>
           <p className="mt-4 max-w-2xl mx-auto text-sm text-muted-foreground">
             En Fénix Legacy valoramos y respetamos tu privacidad. Esta política describe cómo recopilamos,
