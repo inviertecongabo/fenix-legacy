@@ -83,6 +83,56 @@ const terms: AccordionItem[] = [
         </p>
       </div>
     ),
+  },
+  {
+    id: 5,
+    title: "Disponibilidad de Productos y Gestión de Inventario",
+    content: (
+      <div className="space-y-3">
+        <p>
+          La disponibilidad de los productos mostrada en la página web refleja el inventario en tiempo real. En caso de que un producto que hayas comprado no esté disponible, te contactaremos de inmediato para ofrecerte una alternativa o proceder con el reembolso correspondiente.
+        </p>
+        <p>
+          Fénix Legacy gestiona un sistema de inventario por talla y color para cada prenda. Es responsabilidad del cliente verificar la disponibilidad de la variante exacta (talla y color) antes de confirmar la compra.
+        </p>
+      </div>
+    ),
+  },
+  {
+    id: 6,
+    title: "Política de Cancelación de Pedidos",
+    content: (
+      <div className="space-y-3">
+        <p>
+          Podrás cancelar tu pedido sin costo alguno siempre que la solicitud se realice antes de que el pedido haya sido despachado. Una vez despachado, no será posible cancelar la orden y deberá iniciarse un proceso de devolución.
+        </p>
+        <p>
+          Para cancelar un pedido, escríbenos de inmediato a ventas@fenixlegacy.com con tu número de pedido. Te confirmaremos la cancelación por la misma vía.
+        </p>
+      </div>
+    ),
+  },
+  {
+    id: 7,
+    title: "Conducta Fraudulenta o Abusiva",
+    content: (
+      <div className="space-y-3">
+        <p>
+          Fénix Legacy se reserva el derecho de cancelar pedidos y bloquear cuentas en caso de detectar actividad fraudulenta, abusiva o que contravenga estos Términos y Condiciones. Esto incluye, entre otros, el uso de información de pago falsa, intentos de eludir el sistema de inventario o cualquier otra conducta que afecte la operación normal de la tienda o los derechos de otros clientes.
+        </p>
+      </div>
+    ),
+  },
+  {
+    id: 8,
+    title: "Modificaciones a los Términos y Condiciones",
+    content: (
+      <div className="space-y-3">
+        <p>
+          Fénix Legacy se reserva el derecho de actualizar o modificar estos Términos y Condiciones en cualquier momento. Los cambios entrarán en vigor desde el momento de su publicación en la página web. Es responsabilidad del cliente revisar periódicamente estos términos. El uso continuado de la página web después de cualquier modificación constituye la aceptación de los nuevos términos.
+        </p>
+      </div>
+    ),
   }
 ]
 
@@ -124,7 +174,7 @@ export default function TermsPage() {
             Términos y Condiciones
           </h1>
           <p className="mt-3 text-muted-foreground">
-            Última actualización: 18/7/2026
+            Última actualización: 20/07/2026
           </p>
           <p className="mt-4 max-w-2xl mx-auto text-sm text-muted-foreground">
             Bienvenido a Fénix Legacy. Al acceder, navegar y realizar una compra en nuestro sitio web o a través de nuestros canales de atención, aceptas los siguientes Términos y Condiciones. Te invitamos a leerlos detenidamente antes de concretar tu pedido.
